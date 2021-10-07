@@ -219,6 +219,7 @@ procedure Check2O(f)//Here we check whether, in a given number field defined by 
 	D:=Discriminant(K);
 	R:=RingOfIntegers(K);
 	i:=1;
+	j:=0;
 	L4:=NumberFieldLatticeWithGram(IdentityMatrix(R,4));
 	L:=NumberFieldLatticeWithGram(IdentityMatrix(R,#f+2));//Creating lattice of sum of degree + 3 squares.
 	while i le D do;//The following loop is modified version of the check above. Here we consider all the totally positive elements of a given norm, up to multiplication be squared units.
@@ -239,14 +240,17 @@ procedure Check2O(f)//Here we check whether, in a given number field defined by 
 		for e in E0 do;
 			if(#Sphere(L4,2*e) eq 0) then;
 				if(#Sphere(L,2*e) eq 0) then print "The elements is totally positive", IsTotallyPositive(e), "in", K ,2*e,"and is not represented as a sum of squares.";
-				break;
+					j+:=1;				
+					break;
 				else Exclude(~E0,e);
 				end if;
 			else Exclude(~E0,e);
 			end if;
 		end for;
+		if j ge 1 then break;
+		end if;
 	end while;
-	if(i ge D+1) then print "All even totally positive integers are represented as sums of squares in",K;
+	if(j le 0) then print "All even totally positive integers are represented as sums of squares in",K;
 	end if;
 end procedure;
 
@@ -255,5 +259,4 @@ time CheckCubic();
 time Check2O([-2,8,-6,1]);
 time CheckQuartic();
 time CheckQuartic([11,0,-7,0,1]);
-
 
