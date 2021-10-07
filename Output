@@ -47,7 +47,7 @@ Time: 20.570
 > time Check2O([-2,8,-6,1]);
 All even totally positive integers are represented as sums of squares in Number Field with defining polynomial x^3 - 6*x^2 + 8*x - 2 over the
 Rational Field
-Time: 15.700
+Time: 16.340
 > time CheckQuartic();
 Found 190084 polynomials of degree 4.
 There are 73817 corresponding distinct quartic number fields.
@@ -239,11 +239,4 @@ Time: 49957.630
 The elements is totally positive true in Number Field with defining polynomial x^4 - 7*x^2 + 11 over the Rational Field
 [0, 20, 4, -6]
 and is not represented as a sum of squares.
-The elements is totally positive true in Number Field with defining polynomial x^4 - 7*x^2 + 11 over the Rational Field
-[-40, 46, 22, -16]
-and is not represented as a sum of squares.
-All even totally positive integers are represented as sums of squares in Number Field with defining polynomial x^4 - 7*x^2 + 11 over the
-Rational Field
-Time: 5511.570
->
-
+Time: 2.420
