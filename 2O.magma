@@ -1,0 +1,259 @@
+// Robinson's algorithm as in https://github.com/grwgrvs/equiangular17
+
+numberRealRoots:=function(p,lb,ub)
+	P<x>:=PolynomialRing(RealField());
+	RR:=[r[1]:r in Roots(P!p)|r[1] le ub and r[1] ge lb];
+	return #Set(RR);
+end function;
+
+step:=function(d,clist,lb,ub)
+	P<x>:=PolynomialRing(Rationals());
+	Q<xx,y>:=PolynomialRing(Rationals(),2);
+	f:=P!Polynomial(Reverse(clist));
+	nn:=#clist-1;
+	f*:=x^(d-nn);
+	for j in [1..d-nn-1] do
+		f:=Derivative(f);
+		f/:=j;
+	end for;
+	g:=Q!Evaluate(f,xx)+y;
+	g:=P!UnivariatePolynomial(Discriminant(g,xx));
+	roots:=Roots(g,RealField(1000));
+	groots:=[];
+	for i in [1..#roots] do
+		groots cat:=[roots[i][1] : j in [1..roots[i][2]]];
+	end for;
+	if nn eq 1 then
+		low:=1;
+		high:=Floor(groots[1]);
+	else
+		pos:=Floor(nn/2);
+		low:=Ceiling(groots[pos]);
+		high:=Floor(groots[pos+1]);
+	end if;
+	ss:=[];
+	for j in [Ceiling(low)..Floor(high)+1] do
+		if numberRealRoots(f+j,lb,ub) eq nn+1 then
+			ss  cat:=[clist cat [j]];
+		end if;
+	end for;
+	return ss;
+end function;
+
+Robinson:=function(d,clist,lb,ub)
+	P<x>:=PolynomialRing(Rationals());
+	cc:=[];
+	ss:=step(d,clist,lb,ub);
+	while #ss ge 1 and #Random(ss)-2 le d do s0:=[];
+		for s in ss do
+			if #s-1 eq d then
+				f:=P!Polynomial(Reverse(s));
+				 if IsIrreducible(f) then cc cat:=[f];
+				 end if;
+			else s0 cat:=step(d,s,lb,ub);
+			end if;
+		end for;
+		ss:=s0; 
+	end while;
+		return cc;
+end function;
+
+//Main check
+
+UB:=2+Sqrt(6)+Ceiling(2+Sqrt(6)); //Upper bound from paper for the largest root of a polynomial
+
+procedure CheckBiquadratic()//First we find all quadratic number fields with small generators and compose them and check for 2O representability. 
+	D2:=[];
+	for tr in {3..Floor(1+1*UB)} do D2 cat:= Robinson(2,[1,-tr],0,UB); //find all irreducible quadratic polynomials whose roots are between 0 and UB with traces between 3 and 10.
+	end for;
+	print "Found", #D2, "polynomials of degree 2 with roots between 0 and", UB;
+	F2:=[];
+	for f in D2 do K:=NumberField(f); //To each polynomial we correspond a number field.
+		if(#F2 eq 0) then F2 cat:=[K];
+		elif(exists(u){u:u in F2|IsIsomorphic(u,K)} eq false) then F2 cat:=[K]; //We check number fields for equality.
+		end if;
+	end for;
+	print "There are", #F2, "corresponding distinct quadratic number fields.";
+	C04:=[];
+	ll:=#F2;
+	for a in {1..ll}, b in {a+1..ll} do K:=Compositum(F2[a], F2[b]);R:=RingOfIntegers(K);L:=NumberFieldLatticeWithGram(IdentityMatrix(R,7)); //Here we consider the composition of pairs of distinct quadratic number fields. Further, we check whether the 2*generator (i.e. one of the integral basis) is represented by the sum of (7) squares.
+		if(IsTotallyPositive(R![0,2,0,0]) eq false) then C04 cat:=[K];//Before checking the generator, we make sure that it is indeed totally positive.
+		elif(#Sphere(L,R![0,2,0,0]) ge 1) then C04 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #C04, "biquadratic number fields after checking the generator.";
+	C4:=[];
+	for K in C04 do;//We check for isomorphism again among the biquadratic number fields.
+		if(#C4 eq 0) then C4 cat:=[K];
+		elif(exists(u){u:u in C4|IsIsomorphic(u,K)} eq false) then C4 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #C4, "distinct biquadratic number fields.";
+	//Next, we check whether the list contains one of the known fields where squares represent 2O+.
+	Z<x>:=PolynomialRing(Integers());
+	for K in C4 do;
+		if(IsIsomorphic(K,NumberField(x^4-6*x^2+4))) then Exclude(~C4,K);
+		end if;
+	end for; 
+	print "We are left with", #C4, "candidate biquadratic number fields.";
+	C04:=[];
+	for K in C4 do D:=Discriminant(K);//For the remaining number fields, we check all the elements of norms between 1 and its discriminant.
+		R:=RingOfIntegers(K);
+		el:=-1;//This is an initial value for the totally positive integer, which is currently set to be totally negative.
+		i:=1;
+		L4:=NumberFieldLatticeWithGram(IdentityMatrix(R,4));//We construct two lattices, one with four squares and one with seven over the ring of integers of the corresponding number field.
+		L:=NumberFieldLatticeWithGram(IdentityMatrix(R,7));
+		while i le D do;//Here we run over all the elements of norm up to the discriminant D of the number field.
+			while IsTotallyPositive(el) eq false do;//Here we run until we find a totally positive element of the given norm.
+				t,E:=NormEquation(R,i);//This function finds solutions in R (the ring of integers) to the norm equation, i.e. looks for an elements of norm i in R.	
+				while t eq false do i+:=1;//This loop looks for the first element of norm >=i.
+					t,E:=NormEquation(R,i);
+				end while;
+				i+:=1;
+				for e in E do u:=UnitsWithSigns(e);el:=e;//Here we check whether the corresponding element is totally positive, i.e. if there exist units of the same signature as el.
+					if(#u ge 1) then break;//If the element is totally positive, we break out of this loop. Note that UnitsWithSigns returns all the units up to squares. Thus, here we consider only the first occurrence.
+					end if;
+				end for;
+				if(#u ge 1) then el*:=u[1];//If there exists a totally positive integer of norm i, we set el to be it. 
+				end if;
+			end while;
+			if(#Sphere(L4,2*el) eq 0) then;//First, we check if 2*el is represented as the sum of four squares. If yes, then we look for the next candidate totally positive integer.
+				if(#Sphere(L,2*el) eq 0) then print "In", K ,2*el, "is not represented as a sum of squares.";//We check whether 2*el is represented by the sum of squares over R (the Pythagoras number in quartic number fields is bounded by 7. Thus, 7 squares suffices).
+					break;
+				else el:=-1;
+				end if;
+			else el:=-1;
+			end if;
+		end while;
+		if(i ge D+1) then C04 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #C04, "biquadratic number fields:",C04;
+end procedure;
+
+
+procedure CheckCubic()//The following procedure is comparable to the check of the biquadratic case, but here it suffices to find only polynomials of degree 3.
+	D3:=[];
+	for tr in {5..Floor(1+2*UB)} do D3 cat:= Robinson(3,[1,-tr],0,UB);
+	end for;
+	print "Found", #D3, "polynomials of degree 3.";
+	F3:=[];
+	for f in D3 do K:=NumberField(f);
+		if(#F3 eq 0) then F3 cat:=[K];
+		elif(exists(u){u:u in F3|IsIsomorphic(u,K)} eq false) then F3 cat:=[K];
+		end if;
+	end for;
+	print "There are", #F3, "corresponding distinct cubic number fields.";
+	F03:=[];
+	for K in F3 do R:=RingOfIntegers(K);L:=NumberFieldLatticeWithGram(IdentityMatrix(R,6));
+		if(IsTotallyPositive(R![0,2,0]) eq false) then F03 cat:=[K]; 
+			elif(#Sphere(L,R![0,2,0]) ge 1) then F03 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #F03, "cubic number fields:",F03;
+end procedure;
+
+procedure CheckQuartic()//Here we check all the quartic number fields that the generating polynomial satisfies house bounds (we check biquadratic number fields separately above).
+	D4:=[];
+	for tr in {7..Floor(1+3*UB)} do D4 cat:= Robinson(4,[1,-tr],0,UB);
+	end for;
+	print "Found", #D4, "polynomials of degree 4.";
+	F4:=[];
+	for f in D4 do K:=NumberField(f);
+		if(#F4 eq 0) then F4 cat:=[K];
+		elif(exists(u){u:u in F4|IsIsomorphic(u,K)} eq false) then F4 cat:=[K];
+		end if;
+	end for;
+	print "There are",  #F4, "corresponding distinct quartic number fields.";
+	F04:=[];
+	for K in F4 do R:=RingOfIntegers(K);L:=NumberFieldLatticeWithGram(IdentityMatrix(R,7));
+		if(IsTotallyPositive(R![0,2,0,0]) eq false) then F04 cat:=[K]; 			
+			elif(#Sphere(L,R![0,2,0,0]) ge 1) then F04 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #F04, "quartic number fields after checking the generator.";
+	Z<x>:=PolynomialRing(Integers());
+	for K in F04 do;//Excluding known examples + a single "problematic" case.
+		if(IsIsomorphic(K,NumberField(x^4-6*x^2+4))) or (IsIsomorphic(K,NumberField(x^4-5*x^2+5))) or (IsIsomorphic(K,NumberField(x^4-7*x^2+11))) then Exclude(~F04,K);
+		end if;
+	end for; 
+	#F04;
+	F14:=[];
+	for K in F04 do D:=Discriminant(K);
+		R:=RingOfIntegers(K);
+		el:=-1;
+		i:=1;
+		L4:=NumberFieldLatticeWithGram(IdentityMatrix(R,4));
+		L:=NumberFieldLatticeWithGram(IdentityMatrix(R,7));
+		while i le D do;
+			while IsTotallyPositive(el) eq false do;	
+				t,E:=NormEquation(R,i);	
+				while t eq false do i+:=1;
+					t,E:=NormEquation(R,i);
+				end while;
+				i+:=1;
+				for e in E do u:=UnitsWithSigns(e);el:=e;
+					if(#u ge 1) then break;
+					end if;
+				end for;
+				if(#u ge 1) then el*:=u[1];
+				end if;
+			end while;
+			if(#Sphere(L4,2*el) eq 0) then;
+				if(#Sphere(L,2*el) eq 0) then print "In", K ,2*el, "is not represented as a sum of squares.";
+				break;
+				else el:=-1;
+				end if;
+			else el:=-1;
+			end if;
+		end while;
+		if(i ge D+1) then F14 cat:=[K];
+		end if;
+	end for;
+	print "We are left with", #F14, "number fields:",F14;
+end procedure;
+
+procedure Check2O(f)//Here we check whether, in a given number field defined by f (degree<=5), every even element is represented by the sum of squares. This will be used to verify that all even (multiples of two) totally positive integers in the cubic number field generated by x^3-6*x^2+8*x-1 are represented by the sum of squares form. Also, by running it for x^4-7*x^2+11, we find examples of totally positive integers divisible by two but not represented by the sum of squares.
+	Z<x>:=PolynomialRing(Integers());
+	K:=NumberField(Z!f);
+	D:=Discriminant(K);
+	R:=RingOfIntegers(K);
+	i:=1;
+	L4:=NumberFieldLatticeWithGram(IdentityMatrix(R,4));
+	L:=NumberFieldLatticeWithGram(IdentityMatrix(R,#f+2));//Creating lattice of sum of degree + 3 squares.
+	while i le D do;//The following loop is modified version of the check above. Here we consider all the totally positive elements of a given norm, up to multiplication be squared units.
+		E0:=[];
+		while #E0 le 1 do;	
+			t,E:=NormEquation(R,i);	
+			while t eq false do i+:=1;
+				t,E:=NormEquation(R,i);
+			end while;
+			i+:=1;
+			for e in E do U:=UnitsWithSigns(e);
+				if(#U ge 1) then;
+					for u in U do E0 cat:=[u*e];
+					end for;
+				end if;
+			end for;
+		end while;
+		for e in E0 do;
+			if(#Sphere(L4,2*e) eq 0) then;
+				if(#Sphere(L,2*e) eq 0) then print "The elements is totally positive", IsTotallyPositive(e), "in", K ,2*e,"and is not represented as a sum of squares.";
+				break;
+				else Exclude(~E0,e);
+				end if;
+			else Exclude(~E0,e);
+			end if;
+		end for;
+	end while;
+	if(i ge D+1) then print "All even totally positive integers are represented as sums of squares in",K;
+	end if;
+end procedure;
+
+time CheckBiquadratic();
+time CheckCubic();
+time Check2O([-2,8,-6,1]);
+time CheckQuartic();
+time CheckQuartic([11,0,-7,0,1]);
+
+
