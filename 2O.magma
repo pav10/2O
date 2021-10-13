@@ -177,7 +177,7 @@ procedure CheckQuartic()//Here we check all the quartic number fields that the g
 		if(IsIsomorphic(K,NumberField(x^4-6*x^2+4))) or (IsIsomorphic(K,NumberField(x^4-5*x^2+5))) or (IsIsomorphic(K,NumberField(x^4-7*x^2+11))) then Exclude(~F04,K);
 		end if;
 	end for; 
-	#F04;
+	print "We are left with", #F04, "quartic number fields after the exclusion of the known cases.";
 	F14:=[];
 	for K in F04 do D:=Discriminant(K);
 		R:=RingOfIntegers(K);
