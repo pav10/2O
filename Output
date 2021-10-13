@@ -52,7 +52,8 @@ Time: 16.340
 Found 190084 polynomials of degree 4.
 There are 73817 corresponding distinct quartic number fields.
 We are left with 63 quartic number fields after checking the generator.
-60
+We are left with 60 quartic number fields after the exclusion of the known
+cases.
 In Number Field with defining polynomial x^4 - 7*x^3 + 13*x^2 - 7*x + 1 over the Rational Field
 [6, -20, 22, -4]
 is not represented as a sum of squares.
