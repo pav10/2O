@@ -258,5 +258,5 @@ time CheckBiquadratic();
 time CheckCubic();
 time Check2O([-2,8,-6,1]);
 time CheckQuartic();
-time CheckQuartic([11,0,-7,0,1]);
+time Check2O([11,0,-7,0,1]);
 
