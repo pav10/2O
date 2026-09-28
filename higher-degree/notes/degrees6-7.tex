@@ -25,16 +25,16 @@
 \newcommand{\nurel}{\nu_{K/F}}
 \newcommand{\file}[1]{\texttt{#1}}
 
-\title{The lifting problem for universal quadratic forms in degree six}
+\title{The lifting problem for universal quadratic forms in degrees six and seven}
 \date{Draft notes, September 2026. Code and data: \file{higher-degree/} in \url{https://github.com/pav10/2O}}
 
 \begin{document}
 
 \begin{abstract}
-We show that no totally real number field of degree $6$ admits a universal quadratic form
-with rational integer coefficients (a universal $\Z$-form).  Together with the classification
-in degrees $\le 5$ by Kala and Yatsyna, the fields of degree at most $6$ with a universal
-$\Z$-form are exactly $\Q$, $\Q(\sqrt5)$ and $\Q(\zeta_7+\zeta_7^{-1})$.
+We show that no totally real number field of degree $6$ or $7$ admits a universal quadratic
+form with rational integer coefficients (a universal $\Z$-form).  Together with the
+classification in degrees $\le 5$ by Kala and Yatsyna, the fields of degree at most $7$ with a
+universal $\Z$-form are exactly $\Q$, $\Q(\sqrt5)$ and $\Q(\zeta_7+\zeta_7^{-1})$.
 The proof replaces the house bound of the degree-$\le 5$ argument by the geometry of the
 \emph{variance lattice} $\LamK=\OK/\Z$: a tensor-product minimum bound turns the existence of a
 universal $\Z$-form into lower bounds for traces of totally positive integers, and a
@@ -43,7 +43,9 @@ This makes the search space small: in the case where the shortest vector generat
 no number field has to be computed at all (every candidate dies inside the order $\Z[x_1]$);
 in the imprimitive case only $18$ fields are ever built, and the last five are excluded by
 explicit elements.  A second, independent route through the Mordell--Ko theorem and the
-$E_6$ trace threshold confirms every final certificate.
+$E_6$ trace threshold confirms every final certificate.  In degree $7$ (no proper subfields,
+$\nu(K)\le(11+\sqrt{105})/4$) all $5.3\cdot10^8$ candidate polynomials are excluded inside
+$\Z[x_1]$, again without computing a single number field.
 \end{abstract}
 
 \maketitle
@@ -63,14 +65,19 @@ degree $6$ was the first open case.
 No totally real number field of degree $6$ admits a universal $\Z$-form.
 \end{theorem}
 
+\begin{theorem}\label{thm:seven}
+No totally real number field of degree $7$ admits a universal $\Z$-form.
+\end{theorem}
+
 \begin{corollary}\label{cor:le6}
-A totally real field of degree $d\le 6$ admits a universal $\Z$-form if and only if it is
+A totally real field of degree $d\le 7$ admits a universal $\Z$-form if and only if it is
 $\Q$, $\Q(\sqrt5)$ or $\Q(\zeta_7+\zeta_7^{-1})$.
 \end{corollary}
 
 The proof has a theoretical part (\S\S\ref{sec:setup}--\ref{sec:e6}), which reduces the
 theorem to a finite computation with explicit bounds, and a computational part
-(\S\ref{sec:computation}).  The main steps are:
+(\S\ref{sec:computation} for degree $6$, \S\ref{sec:deg7} for degree $7$).  The main
+steps are:
 \begin{enumerate}[label=(\roman*)]
 \item The necessary condition~(N) of \cite{KY1}: every totally positive $\alpha$ is
   $\alpha=\sum M_{ij}\omega_i\omega_j$ for a positive semidefinite half-integral $M$.
@@ -294,15 +301,16 @@ For testing, rigidity is used in the following form, which needs no search in $\
 Let $\alpha$ be as in Proposition~\ref{prop:rigidity} and suppose $\Q(\alpha)=K$.  Then there
 is $\kappa\in\Z$ with $\kappa\equiv0,3\pmod4$ such that $4\alpha-\kappa=z^2$ with $z\in\OK$,
 $4\nu(K)\le\Var(z)\le4\tau(\alpha)$ and
-$0<4\min_j\sigma_j(\alpha)-\kappa\le\max\bigl(7.2\,\tau(\alpha),\,\Var(\alpha)/\nu(K)\bigr)$.
+$0<4\min_j\sigma_j(\alpha)-\kappa\le\max\bigl(\frac{d^2}{d-1}\tau(\alpha),\,\Var(\alpha)/\nu(K)\bigr)$
+(for $d=6$: $\frac{36}5\tau(\alpha)=7.2\,\tau(\alpha)$).
 Equivalently, the polynomial $4^d m_\alpha((t^2+\kappa)/4)\in\Z[t]$ has an irreducible factor
 of degree $d$ whose roots have variance in $[4\nu(K),4\tau(\alpha)]$.
 \end{lemma}
 
 \begin{proof}
 Take $z=2y+c$ and $\kappa=4b-c^2$.  Put $u=4\min\sigma(\alpha)-\kappa$, so that
-$|\sigma_j(z)|\ge\sqrt u$.  If the signs of the conjugates of $z$ are mixed, then
-$\Var(z)\ge\frac5{36}(2\sqrt u)^2$, so $u\le1.8\cdot4\tau(\alpha)$.  If they all agree,
+$|\sigma_j(z)|\ge\sqrt u$.  If $p\ge1$ conjugates of $z$ are positive and $q\ge1$ negative, then
+$\Var(z)\ge\frac{pq}{d^2}(2\sqrt u)^2\ge\frac{d-1}{d^2}\,4u$, so $u\le\frac{d^2}{d-1}\tau(\alpha)$.  If they all agree,
 $\Var(z)=\Var(\sqrt{4\alpha-\kappa})\le4\Var(\alpha)/u$, and $\Var(z)\ge4\nu$ gives
 $u\le\Var(\alpha)/\nu$.
 \end{proof}
@@ -447,13 +455,71 @@ $K=F(y)$ for a relative shortest vector $y$ within the enumerated range.  The re
 is one of the $18$ fields of \S\ref{sec:caseB}, each of which violates rigidity or (N).
 \qed
 
+\section{Degree seven}\label{sec:deg7}
+
+Let $K$ be a septic field with a universal $\Z$-form.  Budget--cost, rigidity and
+Corollary~\ref{cor:nubound} hold for $d=7$: the tensor rank is at most $\rk\LamK=6$, and
+$s/\gamma_s^2\ge\frac32$ for $2\le s\le6$.  Thus $\nu(K)\le(11+\sqrt{105})/4=5.3117\ldots$.
+Since $7$ is prime, $K$ has no proper subfields.  So the shortest vector $x_1$ generates $K$
+(only Case A occurs), and every non-rational element of $K$ generates $K$.  In particular
+Lemma~\ref{lem:sqshape} applies to every totally positive non-rational $\alpha$ in the rigidity
+window.
+
+The enumeration of \S\ref{sec:caseA} (with $\Tr x_1\in\{0,1,2,3\}$ and centred
+$T_2\le7(11+\sqrt{105})/4$) produces $5.3\cdot10^8$ leaves.  So we also run two of the
+order-level tests inside the enumerator (\file{enum6.c}, mode \texttt{strong}):
+\begin{itemize}[leftmargin=*]
+\item[(NS)] for $y=cx_1^2+bx_1$ ($1\le c\le3$) and $y=x_1^3+ax_1^2+bx_1$, with the integers
+  $a,b$ near the real minimiser of $\Var(y)$: if $0<\Var(y)<\Var(x_1)$, then $x_1$ is not a
+  shortest vector;
+\item[(RIG)] Lemma~\ref{lem:sqshape} for the two downspread elements $\alpha_\pm$ of
+  Lemma~\ref{lem:downspread}, whenever $\tau(\alpha_\pm)<\frac32\Var(x_1)$.  As $K=\Q(\alpha)$,
+  the conjugates of $z$ are $\pm\sqrt{4\sigma_j(\alpha)-\kappa}$.  So $z\in\OK$ exists iff, for
+  some $\kappa$ in the range of the lemma and some choice of signs, all elementary symmetric
+  functions of these numbers are integers, and $\Var(z)\in[4\Var(x_1),4\tau(\alpha)]$.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+real-rooted polynomials enumerated (leaves) & 533\,562\,406\\
+excluded by the downspread inequalities (Lemma~\ref{lem:downspread}) & 531\,897\,850\\
+excluded by Lemma~\ref{lem:quadfilter} & 41\,498\\
+excluded by (NS) in the enumerator & 2\,532\\
+excluded by (RIG) in the enumerator & 1\,619\,004\\
+remaining & 1\,522\\
+\midrule
+irreducible among them & 23\\
+exact tests in $\Z[x_1]$ (\S\ref{sec:caseA}): NS / BC / RG & 5 / 3 / 15\\
+\textbf{survivors} & \textbf{0}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{proof}[Proof of Theorem~\ref{thm:seven}]
+A suitable normalisation of the shortest vector $x_1$ of $K$ has its minimal polynomial among
+the enumerated leaves.  Every irreducible leaf violates a necessary condition for being the
+minimal polynomial of a shortest vector of a field with a universal $\Z$-form.
+\end{proof}
+
+No number field and no maximal order is computed in degree $7$.  The in-enumerator tests (NS),
+(RIG) are the only new ingredients.  Each exclusion they make on an irreducible polynomial was
+re-checked in exact arithmetic (\file{verify\_strong.gp}): for (NS), the exact minimum of $\Var$
+on $\Z[x_1]\setminus\Z$ by Fincke--Pohst; for (RIG), \texttt{sqshape}, i.e.\ factorisation of
+$4^7m_\alpha((t^2+\kappa)/4)$ over $\Q$.  In degree $7$ this re-check covers
+$857\,103$ irreducible polynomials (the other $764\,433$ excluded polynomials are reducible), with no disagreement.  In degree $6$ it covers all
+$15\,714$ exclusions on irreducible polynomials made by the strong mode, also with no
+disagreement.  \file{run\_degree7.sh} reproduces the computation in about 30 minutes on
+4 cores.
+
 \section{Consistency checks and status}\label{sec:status}
 
 \begin{itemize}[leftmargin=*]
 \item \textbf{Enumerator.}  \file{enum6.c} agrees exactly with an exact-arithmetic
   re-implementation (\file{enum\_check.gp}, real-rootedness by Sturm sequences) on all 56
   subtrees and all $2\,088\,667$ leaves in degree $6$, and with brute force over coefficient
-  boxes in degrees $3$--$5$.
+  boxes in degrees $3$--$5$.  In degree $7$ it agrees with \file{enum\_check.gp} on
+  the $48$ subtrees with the fewest leaves ($2\,267\,434$ leaves in total).
 \item \textbf{Degrees $\le5$ reproduced.}  The same pipeline, with the degree-$d$ bound of
   Corollary~\ref{cor:nubound}, leaves $\Q(\sqrt2)$, $\Q(\sqrt5)$ in degree $2$, and
   $\Q(\zeta_9)^+$, $\Q(\zeta_7)^+$ in degree $3$.  Of these, $\Q(\sqrt2)$ and
@@ -471,11 +537,14 @@ is one of the $18$ fields of \S\ref{sec:caseB}, each of which violates rigidity 
   $\delta_F$ for the four fields.
 \end{itemize}
 
-\begin{remark}[higher degree]
-Budget--cost, rigidity and Corollary~\ref{cor:nubound} hold verbatim for $d=7$, since tensor
-rank $\le6$ still gives $s/\gamma_s^2\ge\frac32$.  A septic field has no proper subfields,
-so only Case A occurs.  The bound becomes $\nu\le(11+\sqrt{105})/4\approx5.31$, and the
-enumeration runs over septic polynomials with centred $T_2\le 7\cdot5.31$.
+\begin{remark}[degree $8$ and beyond]
+Lemma~\ref{lem:tensor} gives $s/\gamma_s^2\ge\frac32$ also for $s=7,8$ ($\gamma_7^7=64$,
+$\gamma_8=2$).  So budget--cost, rigidity and Corollary~\ref{cor:nubound} hold for $d\le9$,
+and $d=8$ has $\nu(K)\le3+2\sqrt2=5.83$.  Two things are new in degree $8$.  Case B must
+handle quadratic subfields with relative degree $4$ and quartic subfields with relative
+degree $2$.  And the Case A enumeration is much larger: the leaf count grows by roughly
+$2.5$--$3$ per unit of $a_2$, and the range of $a_2$ grows with the bound on $\nu$.  The
+in-enumerator tests of \S\ref{sec:deg7} are what keeps the output manageable.
 \end{remark}
 
 \begin{thebibliography}{KY2}

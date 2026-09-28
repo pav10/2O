@@ -147,7 +147,8 @@ sqshape(f, a, nu) =
   ta = -polcoeff(m, d-1) / d;
   va = (polcoeff(m, d-1)^2 - 2*polcoeff(m, d-2)) / d - ta^2;
   A = 4 * ta;
-  umax = max(1.8 * A, va / nu) + 1;
+  \\ mixed signs: Var(z) >= (d-1)/d^2 * 4u; the constant is d^2/(4(d-1)) (= 1.8 for d = 6)
+  umax = max(max(1.8, d^2/(4*(d-1))) * A, va / nu) + 1;
   forstep (kap = floor(4*mn - umax) - 1, ceil(4*mn), 1,
     if (kap >= 4*mn, break);
     if (kap % 4 == 1 || kap % 4 == 2, next);

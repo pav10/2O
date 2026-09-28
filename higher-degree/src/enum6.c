@@ -24,7 +24,7 @@
  * g_{m-1}; given a_0..a_{m-1} this confines a_m (the constant term of g_m)
  * to an explicit interval.  The enumeration is exhaustive.
  *
- * usage: enum6 a1 a2 [smax [all]]   (the subtree with the given a1,a2)
+ * usage: enum6 a1 a2 [smax [all|strong|why]]   (the subtree with the given a1,a2)
  * output lines: a1 a2 a3 a4 a5 a6
  * stderr: statistics.
  */
@@ -43,8 +43,8 @@ static long a[N + 1];
 static ld Cb[N + 1][N + 1];
 static ld Rt[N + 1][N + 1];      /* Rt[m][0..m-1]: roots of g_m, ascending */
 static ld LB, UB, SMAX, TAU, VAR;
-static long long n_leaf = 0, n_out = 0, n_f1 = 0, n_f2 = 0, n_f3 = 0;
-static int NOFILTER = 0;
+static long long n_leaf = 0, n_out = 0, n_f1 = 0, n_f2 = 0, n_f3 = 0, n_ns = 0, n_rig = 0;
+static int NOFILTER = 0, STRONG = 0, WHY = 0;
 
 static ld g(int m, ld x)
 {
@@ -95,6 +95,139 @@ static int quad_violation(const ld *th)
     return 0;
 }
 
+/* ------------------------------------------------------------------------
+ * STRONG mode (optional): order-level tests inside Z[x_1], done in C.
+ *  NS : some y = c x^2 + b x  or  y = x^3 + a x^2 + b x  (small integers) has
+ *       Var(y) < Var(x_1): then x_1 is not a shortest vector of Lambda_K.
+ *  RIG: rigidity for the downspread elements alpha_- = x_1 - n, alpha_+ = -x_1 + n'
+ *       (they generate K when x_1 does): if tau(alpha) < 3/2 Var(x_1) there must be
+ *       kappa = 0,3 mod 4 and z in O_K with z^2 = 4 alpha - kappa and
+ *       4 Var(x_1) <= Var(z) <= 4 tau(alpha);  here z = sum of the conjugates with
+ *       signs, so some sign pattern of +-sqrt(4 sigma_j(alpha) - kappa) must have
+ *       integral elementary symmetric functions.  Range of kappa: see notes, Lemma 5.1
+ *       (0 < 4 min alpha - kappa <= max(d^2 tau/(d-1), Var(alpha)/Var(x_1))).
+ * All tests exclude only on a clear numerical violation.
+ * ---------------------------------------------------------------------- */
+static ld varv(const ld *v)
+{
+    ld m = 0, s2 = 0;
+    for (int j = 0; j < N; j++) m += v[j];
+    m /= N;
+    for (int j = 0; j < N; j++) s2 += (v[j] - m) * (v[j] - m);
+    return s2 / N;
+}
+
+static int ns_violation(const ld *th)
+{
+    ld p1[N], p2[N], p3[N], y[N];
+    ld tol = 1e-9L * (1 + VAR);
+    for (int j = 0; j < N; j++) { p1[j] = th[j]; p2[j] = th[j] * th[j]; p3[j] = p2[j] * th[j]; }
+    /* covariances */
+    ld m1 = 0, m2 = 0, m3 = 0;
+    for (int j = 0; j < N; j++) { m1 += p1[j]; m2 += p2[j]; m3 += p3[j]; }
+    m1 /= N; m2 /= N; m3 /= N;
+    ld V11 = 0, V22 = 0, V33 = 0, C21 = 0, C31 = 0, C32 = 0;
+    for (int j = 0; j < N; j++) {
+        ld d1 = p1[j] - m1, d2 = p2[j] - m2, d3 = p3[j] - m3;
+        V11 += d1 * d1; V22 += d2 * d2; V33 += d3 * d3;
+        C21 += d2 * d1; C31 += d3 * d1; C32 += d3 * d2;
+    }
+    V11 /= N; V22 /= N; V33 /= N; C21 /= N; C31 /= N; C32 /= N;
+    /* y = c x^2 + b x, c = 1..3 */
+    for (int c = 1; c <= 3; c++) {
+        ld bs = -c * C21 / V11;
+        for (long b = (long)floorl(bs) - 1; b <= (long)ceill(bs) + 1; b++) {
+            ld v = c * c * V22 + 2 * c * b * C21 + (ld)b * b * V11;
+            if (v < VAR - tol) {
+                /* confirm directly from the values; y is non-rational since deg x_1 >= 3 */
+                for (int j = 0; j < N; j++) y[j] = c * p2[j] + b * p1[j];
+                ld vy = varv(y);
+                if (vy < VAR - tol && vy > tol) return 1;
+            }
+        }
+    }
+    /* y = x^3 + a x^2 + b x (non-rational only when deg x_1 >= 4):
+     * real minimiser of the quadratic in (a,b), then a box */
+    ld det = V22 * V11 - C21 * C21;
+    if (N >= 4 && det > 0) {
+        ld as = (-C32 * V11 + C31 * C21) / det, bs = (-C31 * V22 + C32 * C21) / det;
+        for (long aa = (long)floorl(as) - 2; aa <= (long)ceill(as) + 2; aa++)
+            for (long bb = (long)floorl(bs) - 2; bb <= (long)ceill(bs) + 2; bb++) {
+                ld v = V33 + 2 * aa * C32 + 2 * bb * C31 + (ld)aa * aa * V22 + 2 * (ld)aa * bb * C21 + (ld)bb * bb * V11;
+                if (v < VAR - tol) {
+                    for (int j = 0; j < N; j++) y[j] = p3[j] + aa * p2[j] + bb * p1[j];
+                    ld vy = varv(y);
+                    if (vy < VAR - tol && vy > tol) return 1;
+                }
+            }
+    }
+    return 0;
+}
+
+/* av[0..N-1]: conjugates of a totally positive alpha generating K, tau(alpha) < 3/2 VAR.
+ * Returns 1 if the rigidity-by-squares condition can hold (keep), 0 if it certainly fails. */
+static int sq_ok(const ld *av)
+{
+    ld mn = av[0], ta = 0;
+    for (int j = 0; j < N; j++) { if (av[j] < mn) mn = av[j]; ta += av[j]; }
+    ta /= N;
+    ld va = varv(av);
+    ld u1 = (ld)N * N * ta / (N - 1), u2 = va / VAR;
+    ld umax = (u1 > u2 ? u1 : u2) + 1;
+    long kmin = (long)floorl(4 * mn - umax) - 1, kmax = (long)ceill(4 * mn);
+    ld s[N], c[N + 1];
+    for (long kap = kmin; kap <= kmax; kap++) {
+        if ((ld)kap >= 4 * mn - 1e-12L) break;
+        long r = ((kap % 4) + 4) % 4;
+        if (r == 1 || r == 2) continue;
+        ld rhs = 4 * ta - kap - 4 * VAR;         /* (e1/N)^2 <= rhs  <=>  Var(z) >= 4 VAR */
+        if (rhs < -1e-9L) continue;
+        for (int j = 0; j < N; j++) s[j] = sqrtl(4 * av[j] - kap);
+        for (long pat = 0; pat < (1L << (N - 1)); pat++) {
+            ld e1 = s[0];
+            for (int j = 1; j < N; j++) e1 += ((pat >> (j - 1)) & 1) ? -s[j] : s[j];
+            if (fabsl(e1 - roundl(e1)) > 1e-6L) continue;
+            ld q = (e1 / N) * (e1 / N);
+            if (q > rhs + 1e-9L) continue;          /* Var(z) < 4 VAR */
+            if (q < -(ld)kap - 1e-9L) continue;     /* Var(z) > 4 tau(alpha) */
+            /* all elementary symmetric functions integral? */
+            for (int k = 0; k <= N; k++) c[k] = 0;
+            c[0] = 1;
+            for (int j = 0; j < N; j++) {
+                ld zj = (j == 0 || !((pat >> (j - 1)) & 1)) ? s[j] : -s[j];
+                for (int k = j + 1; k >= 1; k--) c[k] -= zj * c[k - 1];
+            }
+            int ok = 1;
+            for (int k = 1; k <= N; k++)
+                if (fabsl(c[k] - roundl(c[k])) > 1e-5L * (1 + fabsl(c[k]) * 1e-12L)) { ok = 0; break; }
+            if (ok) return 1;
+        }
+    }
+    return 0;
+}
+
+/* returns 0 (pass), 1 (alpha_- = x - nm fails), 2 (alpha_+ = np - x fails) */
+static int rig_violation(const ld *th, long *nout)
+{
+    ld av[N];
+    long nm = (long)ceill(th[0]) - 1, np = (long)floorl(th[N - 1]) + 1;
+    if (TAU - nm < 1.5L * VAR - 1e-9L) {
+        for (int j = 0; j < N; j++) av[j] = th[j] - nm;
+        if (!sq_ok(av)) { *nout = nm; return 1; }
+    }
+    if (np - TAU < 1.5L * VAR - 1e-9L) {
+        for (int j = 0; j < N; j++) av[j] = np - th[j];
+        if (!sq_ok(av)) { *nout = np; return 2; }
+    }
+    return 0;
+}
+
+static void printpoly(const char *tag, long extra)
+{
+    if (tag) printf("%s %ld ", tag, extra);
+    for (int i = 1; i <= N; i++) printf("%ld%c", a[i], i == N ? '\n' : ' ');
+}
+
 static void leaf(void)
 {
     ld br[N + 2], th[N];
@@ -110,8 +243,13 @@ static void leaf(void)
     ld dp = (floorl(th[N - 1]) + 1) - TAU;
     if (dp < VAR - 1e-7L) { n_f2++; return; }
     if (N >= 3 && quad_violation(th)) { n_f3++; return; }   /* P(x_1) non-rational needs deg x_1 >= 3 */
+    if (STRONG) {
+        long nn = 0; int rv;
+        if (N >= 3 && ns_violation(th)) { n_ns++; if (WHY) printpoly("NS", 0); return; }  /* c x^2 + b x non-rational needs deg >= 3 */
+        if ((rv = rig_violation(th, &nn))) { n_rig++; if (WHY) printpoly(rv == 1 ? "RIGM" : "RIGP", nn); return; }
+    }
     n_out++;
-    for (int i = 1; i <= N; i++) printf("%ld%c", a[i], i == N ? '\n' : ' ');
+    printpoly(WHY ? "OUT" : NULL, 0);
 }
 
 static void rec(int m)
@@ -150,9 +288,14 @@ int main(int argc, char **argv)
     a[0] = 1;
     a[1] = atol(argv[1]);
     a[2] = atol(argv[2]);
-    /* optional: argv[3] = SMAX override (0 = default), argv[4] = "all" (no filters) */
+    /* optional: argv[3] = SMAX override (0 = default),
+     *           argv[4] = "all" (no filters) or "strong" (add the NS/RIG tests) */
     if (argc > 3 && strtold(argv[3], NULL) > 0) SMAX = strtold(argv[3], NULL);
-    if (argc > 4) NOFILTER = 1;
+    if (argc > 4) {
+        if (argv[4][0] == 's') STRONG = 1;
+        else if (argv[4][0] == 'w') STRONG = WHY = 1;     /* "why": print the reason for each exclusion */
+        else NOFILTER = 1;
+    }
     ld S = (ld)(N - 1) * a[1] * a[1] / N - 2 * (ld)a[2];
     if (S <= 0 || S > SMAX) return 0;
     TAU = -(ld)a[1] / N;
@@ -169,7 +312,7 @@ int main(int argc, char **argv)
         for (int i = 0; i < 2; i++) Rt[2][i] = findroot(2, br[i], br[i + 1]);
         rec(3);
     }
-    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=%lld F1=%lld F2=%lld F3=%lld out=%lld\n",
-            a[1], a[2], S, n_leaf, n_f1, n_f2, n_f3, n_out);
+    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld out=%lld\n",
+            a[1], a[2], S, n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_out);
     return 0;
 }

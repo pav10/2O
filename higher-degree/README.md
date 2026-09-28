@@ -1,16 +1,16 @@
-# Higher degree: the lifting problem in degree 6
+# Higher degree: the lifting problem in degrees 6 and 7
 
 This folder extends the degree ≤ 5 classification of
 Kala–Yatsyna, *Even better sums of squares over quintic and cyclotomic fields*
-(arXiv:2402.03850), to degree 6.
+(arXiv:2402.03850), to degrees 6 and 7.
 
-**Result.** No totally real sextic field admits a universal ℤ-form. Together with
-the degree ≤ 5 theorem, the totally real fields of degree ≤ 6 with a universal
-ℤ-form are exactly ℚ, ℚ(√5) and ℚ(ζ₇+ζ₇⁻¹).
+**Result.** No totally real field of degree 6 or 7 admits a universal ℤ-form.
+Together with the degree ≤ 5 theorem, the totally real fields of degree ≤ 7 with a
+universal ℤ-form are exactly ℚ, ℚ(√5) and ℚ(ζ₇+ζ₇⁻¹).
 
-The write-up with all proofs is [`notes/degree6.pdf`](notes/degree6.pdf)
-(source [`notes/degree6.tex`](notes/degree6.tex)). The verification status is
-listed in §7 of the notes.
+The write-up with all proofs is [`notes/degrees6-7.pdf`](notes/degrees6-7.pdf)
+(source [`notes/degrees6-7.tex`](notes/degrees6-7.tex)). The verification status
+is listed in §8 of the notes.
 
 ## Why the degree ≤ 5 method does not extend, and what replaces it
 
@@ -36,7 +36,7 @@ M ⪰ 0 half-integral. From (N):
   Tr α < 3(3d_K)^{1/6} (≥ 29.47), (N) ⟺ 2α = Σ x_k² with Σ x_k ∈ 2O_K.
   This is used as an independent check.
 
-## What was computed
+## What was computed (degree 6)
 
 | step | objects | outcome |
 |---|---|---|
@@ -55,6 +55,28 @@ The five final certificates:
 | x⁶−9x⁴+24x²−17 | 7138368 | x³−6x²+9x−3 | 12 |
 | x⁶−9x⁴+24x²−19 | 7978176 | x³−6x²+9x−3 | 12 |
 
+## Degree 7
+
+The same theory applies with ν(K) ≤ (11+√105)/4 ≈ 5.31. The tensor rank is ≤ 6, and
+s/γ_s² ≥ 3/2 still holds. A septic field has no proper subfields, so only the case "x₁
+generates K" occurs. To keep the output small, two order-level tests run inside the C
+enumerator (mode `strong`):
+
+* **NS:** c·x₁² + b·x₁ and x₁³ + a·x₁² + b·x₁ must not have smaller variance than x₁.
+* **RIG:** rigidity for the downspread elements α±. This needs 4α − κ = z² in K. Since
+  K = ℚ(α), the conjugates of z are ±√(4σⱼα − κ), and some sign pattern must give
+  integral elementary symmetric functions.
+
+| step | count |
+|---|---|
+| real-rooted septics with Var ≤ 5.31 (leaves) | 533,562,406 |
+| excluded by downspread / quadratic / NS / RIG | 531,897,850 / 41,498 / 2,532 / 1,619,004 |
+| remaining | 1,522 (23 irreducible) |
+| exact tests in ℤ[x₁]: NS / BC / RG | 5 / 3 / 15 |
+| **survivors** | **0**; no number field is computed |
+
+`run_degree7.sh` reproduces this in about 30 minutes on 4 cores.
+
 ## Checks
 
 * `enum6.c` matches an exact-arithmetic re-implementation (`enum_check.gp`,
@@ -66,12 +88,24 @@ The five final certificates:
   fields, all failing (N).
 * Every (N)-witness is confirmed twice: by the M-search (`condN.gp`) and by the
   sum-of-squares search below the E₆ threshold (`sos2.gp`).
+* Every exclusion made by the in-enumerator tests (NS/RIG) on an irreducible
+  polynomial was re-checked in exact arithmetic (`verify_strong.gp`). That is
+  15,714 polynomials in degree 6 and 857,103 in degree 7, with no disagreements.
+  In degree 7 the enumerator also agrees leaf by leaf with `enum_check.gp` on the
+  48 subtrees with the fewest leaves (2,267,434 leaves).
+  `validate.sh D` reruns these checks.
 
 ## Files
 
 ```
-run_degree6.sh          end-to-end reproduction (gcc, PARI/GP >= 2.15, python3+numpy)
-src/enum6.c             Robinson/Rolle enumerator (compile with -DDEG=d); root filters
+run_degree6.sh          end-to-end reproduction, degree 6 (gcc, PARI/GP >= 2.15, python3+numpy)
+run_degree7.sh          end-to-end reproduction, degree 7
+run_sanity.sh           the same machinery in degrees 2-5 (answer key: Kala-Yatsyna)
+validate.sh D           independent checks (exact re-check of C exclusions, enumerator)
+src/enum6.c             Robinson/Rolle enumerator (compile with -DDEG=d); root filters;
+                        mode "strong" adds the NS/RIG tests, mode "why" prints reasons
+src/run_enum_par.sh     parallel driver for the enumerator
+src/verify_strong.gp    exact re-check of the NS/RIG exclusions made in C
 src/run_enum.sh         runs the enumerator over all (a1,a2)
 src/enum_check.gp       exact re-implementation of the enumerator, for validation
 src/lift6.gp            variance lattice of an order: nu, totally positive elements of small
@@ -88,9 +122,10 @@ results/                all outputs (status of every candidate, survivors, witne
 notes/                  LaTeX write-up
 ```
 
-## Next: degree 7
+## Next: degree 8
 
-The theory holds verbatim for d = 7: tensor rank ≤ 6, and s/γ_s² ≥ 3/2 still
-holds. A septic field has no proper subfields, so only Case A occurs, with
-ν ≤ (11+√105)/4 ≈ 5.31. Compile `enum6.c` with `-DDEG=7` and run the order-level
-filters.
+Budget–cost and rigidity hold up to d = 9 (γ₇⁷ = 64, γ₈ = 2), and ν ≤ 3+2√2 ≈ 5.83 for
+d = 8. Two things are new. First, octic fields can have quadratic and quartic subfields,
+so Case B needs relative quartics over quadratic fields and relative quadratics over
+quartic fields. Second, the Case A enumeration is much larger, and the in-enumerator
+tests are what keep it manageable.
