@@ -1,0 +1,32 @@
+== build enumerators
+== step A: primitive case (x_1 generates K)
+[40764, 15720, ["BC", 1314; "NS", 215; "RG", 2401], []]
+[40764, 15720, ["BC", 1282; "NS", 213; "RG", 2435], []]
+[40764, 15720, ["BC", 1230; "NS", 224; "RG", 2476], []]
+[40764, 15720, ["BC", 1236; "NS", 221; "RG", 2473], []]
+irreducible: 15720
+  NS: 873
+  BC: 5062
+  RG: 9785
+  OK: 0
+== step B: possible subfields F = Q(x_1) (degrees 2 and 3; NS/BC only)
+[x^2 - 2, 2; x^2 - x - 1, 5/4]
+[x^3 - 3*x - 1, 2; x^3 - x^2 - 2*x + 1, 14/9]
+== step C: positive covering constants delta_F
+Q(sqrt5)   f=2  max_grid h/f = 1.3090   =>  delta_F <= 1.3110   (worst u' = [-0.61803399  0.        ])
+Q(sqrt2)   f=2  max_grid h/f = 1.7071   =>  delta_F <= 1.7091   (worst u' = [-1.41421356  0.        ])
+Q(z7)+     f=3  max_grid h/f = 1.5313   =>  delta_F <= 1.5513   (worst u' = [-1.2469796 -0.3469796  1.       ])
+Q(z9)+     f=3  max_grid h/f = 2.1329   =>  delta_F <= 2.1529   (worst u' = [-1.53208889 -1.87938524  0.01270364])
+== step D: relative enumeration K = F(y)
+Q(sqrt5): nu_rel <= 3.65128299368382858903288870826190386136808092398523518666495
+Q(sqrt5): 2504 relative cubics in the box; ["BCR", 718; "NSR", 542; "OK", 20]
+Q(sqrt2): nu_rel <= 4.22719219216646053261126863544306991971740343113987767531551
+Q(sqrt2): 3873 relative cubics in the box; ["BCR", 1938; "NSA", 2; "NSR", 418; "OK", 34; "RGA", 58]
+Q(z7)+: nu_rel <= 3.39342518045076555370073990251671806469450732183813201601651, Tr(Delta) <= 40.7211021654091866444088788302006167763340878620575841921982, 1582 totally positive Delta
+Q(z7)+: ["BCR", 50; "NSA", 7; "NSR", 57; "OK", 1; "RGA", 9]
+Q(z9)+: nu_rel <= 4.20302902688776201111270546959783353231189458462080620056410, Tr(Delta) <= 50.4363483226531441333524656351740023877427350154496744067691, 2242 totally positive Delta
+Q(z9)+: ["BCR", 104; "NSA", 7; "NSR", 72; "OK", 7; "RGA", 21]
+== step E: maximal-order tests and (N)-witnesses
+62 order-level survivors, 18 fields
+[[x^6 - x^5 - 7*x^4 + 2*x^3 + 7*x^2 - 2*x - 1, "OK", "WITNESS"], [x^6 - 2*x^5 - 4*x^4 + 8*x^3 + 2*x^2 - 5*x + 1, "RGR", "-"], [x^6 - x^5 - 6*x^4 + 7*x^3 + 4*x^2 - 5*x + 1, "RGR", "-"], [x^6 - 9*x^4 - 4*x^3 + 9*x^2 + 3*x - 1, "RGR", "-"], [x^6 - 10*x^4 + 24*x^2 - 8, "OK", "WITNESS"], [x^6 - 2*x^5 - 5*x^4 + 9*x^3 + 6*x^2 - 9*x + 1, "RGR", "-"], [x^6 - x^5 - 8*x^4 + 10*x^3 + 9*x^2 - 14*x + 4, "RGR", "-"], [x^6 - 12*x^4 + 36*x^2 - 8, "OK", "WITNESS"], [x^6 - 9*x^4 + 24*x^2 - 17, "OK", "WITNESS"], [x^6 - 9*x^4 + 24*x^2 - 19, "OK", "WITNESS"], [x^6 - 8*x^4 - 2*x^3 + 13*x^2 + 6*x - 1, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 12*x^3 + 20*x^2 - 16*x - 4, "RG", "-"], [x^6 - 2*x^5 - 9*x^4 + 10*x^3 + 20*x^2 + 4*x - 1, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 10*x^3 + 24*x^2 - 7, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 8*x^3 + 20*x^2 - 2, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 12*x^3 + 16*x^2 - 16*x + 2, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 10*x^3 + 18*x^2 - 8*x - 1, "RGR", "-"], [x^6 - 2*x^5 - 9*x^4 + 14*x^3 + 16*x^2 - 12*x - 1, "RGR", "-"]]
+EXIT 0
