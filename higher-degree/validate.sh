@@ -5,7 +5,7 @@
 #  (2) enum6.c is compared leaf by leaf with the exact re-implementation enum_check.gp
 #      (all subtrees for D = 6; the subtrees with the fewest leaves, 2.2 million leaves
 #      in total, for D = 7).
-# Running time: D = 6 about 45 minutes, D = 7 about 2 hours on 4 cores.
+# Running time: D = 6 about 45 minutes, D = 7 about 1.5 hours on 4 cores.
 set -e
 D=$1
 cd "$(dirname "$0")/src"

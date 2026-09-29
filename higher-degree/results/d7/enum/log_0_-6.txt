@@ -1,1 +1,1 @@
-a1=0 a2=-6 S=12.0000 leaves=418 F1=1 F2=1 F3=0 NS=122 RIG=190 out=104
+a1=0 a2=-6 S=12.0000 leaves=418 F1=1 F2=1 F3=0 NS=122 RIG=190 out=104 pruned=20

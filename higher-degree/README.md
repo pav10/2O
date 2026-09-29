@@ -75,7 +75,39 @@ enumerator (mode `strong`):
 | exact tests in ℤ[x₁]: NS / BC / RG | 5 / 3 / 15 |
 | **survivors** | **0**; no number field is computed |
 
-`run_degree7.sh` reproduces this in about 30 minutes on 4 cores.
+`run_degree7.sh` reproduces this in about 1 minute on 4 cores, using the tree
+pruning of §8 of the notes. The output is identical to the original ~30 minute run.
+
+## Sharpenings (towards degree 8; §8 of the notes)
+
+* **One universal form (via Oh, PAMS 128 (2000)).** For d ≤ 8, condition (N) holds for α
+  iff α is represented over O_K by Φ_d = ½·Q of the even part of an n-universal lattice
+  of minimal rank: ½(E₆⊥D₇) for d = 6, ½(E₈⊥D₇) for d = 7, ½(E₈⊥D₈) for d = 8. So K has a
+  universal ℤ-form iff Φ_d is universal over K.
+* **Sharpened rigidity.** In α = y² + cy + b, the constant κ = 4b − c² = Q(e)Q(r) − B(e,r)²
+  is ≥ 0 by Cauchy–Schwarz. Hence:
+  * every window element with τ(α) < min(3ν/2, ν + 3/4) is a **square in O_K**;
+  * relatively, 4β − γ² is totally ≥ 0 in O_F.
+* **Effects of sharpened rigidity:**
+  * degrees 2 and 3 need no (N) at all;
+  * in degree 6, 17 of the 18 Case-B fields die by rigidity, and only ℚ(√5, ζ₇⁺) needs (N);
+  * in degree 6, F = ℚ(√2) is impossible in Case B, and F = ℚ(ζ₉)⁺ forces K = ℚ(ζ₃₆)⁺,
+    which then fails rigidity.
+* **Integrality-refined ν bound** (`src/refined_bound.py`): per trace class, ν ≤ 4.25
+  (d = 6), 4.86 (d = 7), 5.50 (d = 8).
+* **Tree pruning** (always on in filtered modes). Even centred moments satisfy
+  M₄, M₆ ≥ aᵏ + bᵏ, and the middle roots lie in a window. The output is unchanged bit for
+  bit, and the leaf count drops: degree 6 from 2.09M to 0.18M, degree 7 from 534M to 7.6M.
+* **Degree 8 status:**
+  * Case B, quartic F: 10 candidates. 7 are impossible, ℚ(√2,√5) is excluded, and
+    ℚ(ζ₁₆)⁺ and ℚ(ζ₂₄)⁺ force K = ℚ(ζ₃₂)⁺ and ℚ(ζ₄₈)⁺, which both fail rigidity.
+  * Case B, quadratic F: ℚ(√2) forces ℚ(ζ₃₂)⁺. **ℚ(√5) is the only open subcase**, needing
+    an enumeration of relative quartics.
+  * **Case A is still too expensive.** The subtree (a₁,a₂) = (0,−16) takes over 25 minutes,
+    and the range goes down to a₂ = −20.
+
+The second paper (arXiv 0807.2099, hosted on hbs.edu) could not be downloaded from this
+environment because both hosts are blocked, so it is not used here.
 
 ## Checks
 
@@ -102,10 +134,13 @@ run_degree6.sh          end-to-end reproduction, degree 6 (gcc, PARI/GP >= 2.15,
 run_degree7.sh          end-to-end reproduction, degree 7
 run_sanity.sh           the same machinery in degrees 2-5 (answer key: Kala-Yatsyna)
 validate.sh D           independent checks (exact re-check of C exclusions, enumerator)
-src/enum6.c             Robinson/Rolle enumerator (compile with -DDEG=d); root filters;
-                        mode "strong" adds the NS/RIG tests, mode "why" prints reasons
+src/enum6.c             Robinson/Rolle enumerator (compile with -DDEG=d); root filters and
+                        tree pruning; mode "strong" adds the NS/RIG tests, "sharp" uses the
+                        sharpened rigidity, "why"/"whysharp" print the reason for each exclusion
 src/run_enum_par.sh     parallel driver for the enumerator
 src/verify_strong.gp    exact re-check of the NS/RIG exclusions made in C
+src/sharp.gp            sharpened rigidity (kappa >= 0): sqshape2, oshape2, fieldtest2
+src/refined_bound.py    integrality-refined bound for nu per trace class
 src/run_enum.sh         runs the enumerator over all (a1,a2)
 src/enum_check.gp       exact re-implementation of the enumerator, for validation
 src/lift6.gp            variance lattice of an order: nu, totally positive elements of small
@@ -124,8 +159,5 @@ notes/                  LaTeX write-up
 
 ## Next: degree 8
 
-Budget–cost and rigidity hold up to d = 9 (γ₇⁷ = 64, γ₈ = 2), and ν ≤ 3+2√2 ≈ 5.83 for
-d = 8. Two things are new. First, octic fields can have quadratic and quartic subfields,
-so Case B needs relative quartics over quadratic fields and relative quadratics over
-quartic fields. Second, the Case A enumeration is much larger, and the in-enumerator
-tests are what keep it manageable.
+See "Sharpenings" above. The only open Case B subcase is F = ℚ(√5), which needs relative
+quartics with ν_{K/F} ≤ 4.21. Case A needs further pruning before it is practical.

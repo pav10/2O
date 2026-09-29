@@ -1,1 +1,1 @@
-a1=-3 a2=2 S=3.7143 leaves=3 F1=0 F2=0 F3=0 NS=3 RIG=0 out=0
+a1=-3 a2=2 S=3.7143 leaves=3 F1=0 F2=0 F3=0 NS=3 RIG=0 out=0 pruned=0

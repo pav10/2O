@@ -1,8 +1,8 @@
 #!/bin/sh
 # run_degree7.sh -- reproduce the degree-7 computation end to end.
 # A septic field has no proper subfields, so only Case A (x_1 generates K) occurs.
-# Requirements: gcc, PARI/GP >= 2.15, python3.  Running time: about 30 minutes on 4 cores
-# for the enumeration (5.3 * 10^8 leaves), a few minutes for the rest.
+# Requirements: gcc, PARI/GP >= 2.15, python3.  Running time: about 1 minute on 4 cores for the
+# enumeration (7.6 * 10^6 leaves after tree pruning; 5.3 * 10^8 without), a few minutes for the rest.
 set -e
 cd "$(dirname "$0")/src"
 R=../results/d7

@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 typedef long double ld;
 #ifndef DEG
@@ -44,7 +45,12 @@ static ld Cb[N + 1][N + 1];
 static ld Rt[N + 1][N + 1];      /* Rt[m][0..m-1]: roots of g_m, ascending */
 static ld LB, UB, SMAX, TAU, VAR;
 static long long n_leaf = 0, n_out = 0, n_f1 = 0, n_f2 = 0, n_f3 = 0, n_ns = 0, n_rig = 0;
-static int NOFILTER = 0, STRONG = 0, WHY = 0;
+static int NOFILTER = 0, STRONG = 0, WHY = 0, SHARP = 0;
+/* moment pruning (only when filters are on): F1/F2 force theta_1 - tau <= -AA and
+ * theta_d - tau >= BB, hence every even centred power sum M_k >= AA^k + BB^k.
+ * M_k depends only on a_1..a_k, so whole subtrees are cut at level k = 4, 6. */
+static ld AA = 0, BB = 0, MIDR = -1;   /* MIDR: radius of the window for theta_2..theta_{d-1} */
+static long long n_prune = 0;
 
 static ld g(int m, ld x)
 {
@@ -175,9 +181,16 @@ static int sq_ok(const ld *av)
     ld u1 = (ld)N * N * ta / (N - 1), u2 = va / VAR;
     ld umax = (u1 > u2 ? u1 : u2) + 1;
     long kmin = (long)floorl(4 * mn - umax) - 1, kmax = (long)ceill(4 * mn);
+    if (SHARP) {
+        /* sharpened rigidity: kappa = 4b - c^2 = Q(e)Q(r) - B(e,r)^2 >= 0 (Cauchy-Schwarz),
+         * and kappa + tau(z)^2 <= 4 (tau(alpha) - nu)  (from Var(z) >= 4 nu) */
+        kmin = 0;
+        long k2 = (long)floorl(4 * (ta - VAR) + 1e-9L);
+        if (k2 < kmax) kmax = k2;
+    }
     ld s[N], c[N + 1];
     for (long kap = kmin; kap <= kmax; kap++) {
-        if ((ld)kap >= 4 * mn - 1e-12L) break;
+        if ((ld)kap >= 4 * mn - 1e-12L || kap > kmax) break;
         long r = ((kap % 4) + 4) % 4;
         if (r == 1 || r == 2) continue;
         ld rhs = 4 * ta - kap - 4 * VAR;         /* (e1/N)^2 <= rhs  <=>  Var(z) >= 4 VAR */
@@ -252,6 +265,29 @@ static void leaf(void)
     printpoly(WHY ? "OUT" : NULL, 0);
 }
 
+/* centred power sum M_k = sum_j (theta_j - tau)^k from a_1..a_k (Newton's identities) */
+static ld centred_moment(int k)
+{
+    ld e[N + 1], p[N + 1];
+    e[0] = 1;
+    for (int i = 1; i <= k; i++) e[i] = (i % 2 ? -1 : 1) * (ld)a[i];
+    p[0] = N;
+    for (int j = 1; j <= k; j++) {
+        ld v = (j % 2 ? 1 : -1) * j * e[j];
+        for (int i = 1; i < j; i++) v += (i % 2 ? 1 : -1) * e[i] * p[j - i];
+        p[j] = v;
+    }
+    ld M = 0, bin = 1, t = -TAU;
+    for (int i = 0; i <= k; i++) {
+        /* C(k,i) p_i t^(k-i) */
+        ld tp = 1;
+        for (int r = 0; r < k - i; r++) tp *= t;
+        M += bin * p[i] * tp;
+        bin = bin * (k - i) / (i + 1);
+    }
+    return M;
+}
+
 static void rec(int m)
 {
     ld lo = -1e30L, hi = 1e30L;
@@ -267,11 +303,24 @@ static void rec(int m)
     for (long am = amin; am <= amax; am++) {
         a[m] = am;
         if (m == N) { leaf(); continue; }
+        if (!NOFILTER && ((N > 4 && m == 4) || (N > 6 && m == 6)) && AA > 0 && BB > 0) {
+            ld Mk = centred_moment(m), bound = powl(AA, m) + powl(BB, m);
+            if (Mk < bound * (1 - 1e-12L) - 1e-9L) { n_prune++; continue; }
+        }
         ld br[N + 2];
         br[0] = LB;
         for (int i = 0; i < m - 1; i++) br[i + 1] = Rt[m - 1][i];
         br[m] = UB;
         for (int i = 0; i < m; i++) Rt[m][i] = findroot(m, br[i], br[i + 1]);
+        /* middle-window pruning: the i-th root of f^(d-m) lies in [theta_i, theta_{i+d-m}];
+         * for 2 <= i <= m-1 this is inside [theta_2, theta_{d-1}], and F1/F2 force all middle
+         * roots into tau +- MIDR with MIDR^2 = S - AA^2 - BB^2. */
+        if (N > 3 && MIDR >= 0 && m >= 3) {
+            int bad = 0;
+            for (int i = 1; i <= m - 2; i++)
+                if (Rt[m][i] < TAU - MIDR - 1e-9L || Rt[m][i] > TAU + MIDR + 1e-9L) { bad = 1; break; }
+            if (bad) { n_prune++; continue; }
+        }
         rec(m + 1);
     }
     a[m] = 0;
@@ -292,8 +341,10 @@ int main(int argc, char **argv)
      *           argv[4] = "all" (no filters) or "strong" (add the NS/RIG tests) */
     if (argc > 3 && strtold(argv[3], NULL) > 0) SMAX = strtold(argv[3], NULL);
     if (argc > 4) {
-        if (argv[4][0] == 's') STRONG = 1;
-        else if (argv[4][0] == 'w') STRONG = WHY = 1;     /* "why": print the reason for each exclusion */
+        if (!strcmp(argv[4], "strong")) STRONG = 1;
+        else if (!strcmp(argv[4], "why")) STRONG = WHY = 1;          /* print the reason for each exclusion */
+        else if (!strcmp(argv[4], "sharp")) STRONG = SHARP = 1;      /* strong + kappa >= 0 */
+        else if (!strcmp(argv[4], "whysharp")) STRONG = SHARP = WHY = 1;
         else NOFILTER = 1;
     }
     ld S = (ld)(N - 1) * a[1] * a[1] / N - 2 * (ld)a[2];
@@ -301,6 +352,18 @@ int main(int argc, char **argv)
     TAU = -(ld)a[1] / N;
     VAR = S / N;
     ld rad = sqrtl((N - 1) * S / N);
+    /* integers L = floor(tau - V + 1), U = ceil(tau + V - 1) (rounded conservatively) */
+    AA = TAU - floorl(TAU - VAR + 1 + 1e-12L);
+    BB = ceill(TAU + VAR - 1 - 1e-12L) - TAU;
+    if (VAR <= 1) AA = BB = 0;
+    if (!NOFILTER && AA > 0 && BB > 0) {
+        ld r2 = S - AA * AA - BB * BB;
+        if (r2 < -1e-9L) {       /* no leaf can pass F1 and F2 */
+            fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=0 F1=0 F2=0 F3=0 NS=0 RIG=0 out=0 pruned=1 (empty by F1/F2)\n", a[1], a[2], S);
+            return 0;
+        }
+        MIDR = sqrtl(r2 > 0 ? r2 : 0) * (1 + 1e-12L) + 1e-12L;
+    }
     LB = TAU - rad - 0.01L;
     UB = TAU + rad + 0.01L;
     Rt[1][0] = TAU;
@@ -312,7 +375,7 @@ int main(int argc, char **argv)
         for (int i = 0; i < 2; i++) Rt[2][i] = findroot(2, br[i], br[i + 1]);
         rec(3);
     }
-    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld out=%lld\n",
-            a[1], a[2], S, n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_out);
+    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld out=%lld pruned=%lld\n",
+            a[1], a[2], S, n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_out, n_prune);
     return 0;
 }

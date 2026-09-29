@@ -38,6 +38,7 @@ wait
 cat $R/imp_F*.log
 
 echo "== step E: maximal-order tests and (N)-witnesses"
+rm -f $R/final_fields.txt
 echo "F = impfields([\"$R/imp_F1.txt\",\"$R/imp_F2.txt\",\"$R/imp_F3.txt\",\"$R/imp_F4.txt\"]); \
       print(F[1], \" order-level survivors, \", #F[2], \" fields\"); \
       print(finalfields(F[2], \"$R/final_fields.txt\"))" | $GP

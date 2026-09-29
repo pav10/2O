@@ -1,1 +1,1 @@
-a1=-1 a2=-2 S=4.8571 leaves=6 F1=0 F2=0 F3=0 NS=5 RIG=0 out=1
+a1=-1 a2=-2 S=4.8571 leaves=6 F1=0 F2=0 F3=0 NS=5 RIG=0 out=1 pruned=0

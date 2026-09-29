@@ -512,6 +512,130 @@ $15\,714$ exclusions on irreducible polynomials made by the strong mode, also wi
 disagreement.  \file{run\_degree7.sh} reproduces the computation in about 30 minutes on
 4 cores.
 
+\section{Sharpenings}\label{sec:sharp}
+
+This section records improvements found after the proofs above.  They are not needed for
+Theorems~\ref{thm:main} and~\ref{thm:seven}.  They shrink the computation considerably, and
+they are the starting point for degree $8$.
+
+\subsection{A single universal form}
+Oh \cite{Oh} determined minimal-rank $n$-universal lattices: $E_6\perp I_7$ and $E_7\perp I_6$
+are $6$-universal \cite[Thms.~2.3, 2.5]{Oh}; $E_8\perp I_7$ and $E_7\perp I_8$ are
+$7$-universal \cite[Cor.~3.2, Thm.~3.3]{Oh}; $E_8\perp I_8$ is $8$-universal
+\cite[Thm.~3.1]{Oh}; and $I_{n+3}$ is $n$-universal for $n\le5$.
+
+\begin{proposition}\label{prop:oh}
+Let $d\le8$, and let $U_d$ be $I_8$ ($d\le5$), $E_6\perp I_7$ ($d=6$), $E_8\perp I_7$ ($d=7$),
+or $E_8\perp I_8$ ($d=8$).  Let $U_d^{\mathrm{ev}}$ be its even sublattice: $D_8$, $E_6\perp D_7$,
+$E_8\perp D_7$, $E_8\perp D_8$ respectively.  For $\alpha\in\OK^+$, condition (N) holds if and
+only if $\alpha$ is represented over $\OK$ by the $\Z$-form $\Phi_d=\frac12Q_{U_d^{\mathrm{ev}}}$.  In
+particular, $K$ admits a universal $\Z$-form if and only if $\Phi_d$ is universal over $K$.
+\end{proposition}
+
+\begin{proof}
+If (N) holds, then $2\alpha=Q_L(v)$ with $L$ even, positive definite, of rank $\le d$.  By
+$d$-universality there is an isometric embedding $L\to U_d$, and its image consists of vectors
+of even norm, hence lies in $U_d^{\mathrm{ev}}$.  The Gram matrix of $\Phi_d$ is half-integral with
+integral diagonal, so the converse is Lemma~\ref{lem:N} applied to $Q=\Phi_d$.
+\end{proof}
+
+So in degree $6$, besides the sums of squares with parity (the $D_7$ part) only one extra
+lattice appears, and it is $E_6$.  This is the structural form of
+Proposition~\ref{prop:e6}.  (N) can also be decided by searching representations by one fixed
+form of rank $\le 16$.
+
+\subsection{Sharpened rigidity and the square dichotomy}
+In the proof of Proposition~\ref{prop:rigidity}, $c=B(e,r)$ and $b=Q_L(r)/2$, so by the
+Cauchy--Schwarz inequality in $L$
+\[
+\kappa:=4b-c^2=Q_L(e)Q_L(r)-B(e,r)^2\ \ge\ 0 .
+\]
+Moreover $\tau(\alpha)=\Var(y)+(\tau(y)+c/2)^2+\kappa/4$, where $\Var(y)\ge\nu(K)$.
+
+\begin{proposition}\label{prop:sharp}
+Under the hypotheses of Proposition~\ref{prop:rigidity} we have $4\alpha=z^2+\kappa$ with
+$z\in\OK$, $\kappa\in\Z_{\ge0}$, $\kappa\equiv0,3\pmod4$ and
+$\kappa+\tau(z)^2\le4(\tau(\alpha)-\nu(K))$.  Consequently:
+\begin{enumerate}[label=(\alph*)]
+\item\emph{(square dichotomy)} if $\tau(\alpha)<\min(\frac32\nu(K),\nu(K)+\frac34)$, then
+  $\alpha$ is a square in $\OK$;
+\item\emph{(relative version)} if $F\subsetneq K$ and $\alpha\notin F$ has
+  $\tau(\alpha)<\frac32\nurel$, then $\alpha=y^2+\gamma y+\beta$ as in
+  Proposition~\ref{prop:relative}, with $4\beta-\gamma^2$ totally non-negative in $\OF$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+If $\kappa\ne0$ then $\kappa\ge3$ and $\tau(\alpha)\ge\nu+\frac34$.  If $\kappa=0$, then $c$ is
+even and $\alpha=(y+c/2)^2$.  For (b), apply Cauchy--Schwarz at every real place of $F$.
+\end{proof}
+
+The effect is visible at once.  In degrees $2$ and $3$, the order-level filters with the
+sharpened test leave exactly $\Q(\sqrt5)$ and $\Q(\zeta_7)^+$, so no (N) search is needed:
+$2\pm\sqrt2$ and $2-\zeta_9-\zeta_9^{-1}$ are window elements that are not squares.  In the
+degree-$6$ Case B, $17$ of the $18$ fields fail the sharpened rigidity (\file{sharp.gp}), and
+only $\Q(\sqrt5,\zeta_7^+)$ needs condition (N).
+
+The square dichotomy also constrains Case B before any enumeration.  If $x_1\in F$, then
+$\nu(K)=\nu(F)$ and every window element of $F$ must be a square in $K$.  If $[K:F]$ is odd,
+it must already be a square in $F$.  If $[K:F]=2$, a non-square $\alpha$ forces $K=F(\sqrt\alpha)$.
+In degree $6$ this gives the following.  $F=\Q(\sqrt2)$ is impossible, since it would force
+$\Q(\zeta_{16})^+\subset K$.  $F=\Q(\zeta_9)^+$ forces
+$K=F(\sqrt{2-\zeta_9-\zeta_9^{-1}})=\Q(\zeta_{36})^+$, which fails the sharpened rigidity.
+Only $F=\Q(\sqrt5)$ and $F=\Q(\zeta_7)^+$ need a relative enumeration.
+
+\subsection{Integrality-refined bound for \texorpdfstring{$\nu$}{nu}}
+With the integer parts kept, the downspread conditions read $\theta_1\le L=\lfloor\tau-\nu+1\rfloor$ and
+$\theta_d\ge U=\lceil\tau+\nu-1\rceil$.  With $a=\tau-L$ and $b=U-\tau$, Cauchy--Schwarz on the
+middle conjugates gives $d\nu\ge a^2+b^2+(a-b)^2/(d-2)$.  For each trace class this is a
+smaller range (\file{refined\_bound.py}):
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+$d$ & Corollary~\ref{cor:nubound} & refined, $\Tr x_1=0,1,2,\dots$\\
+\midrule
+6 & $4.791$ & $4.000,\ 4.139,\ 4.222,\ 4.250$\\
+7 & $5.312$ & $4.857,\ 4.694,\ 4.204,\ 4.245$\\
+8 & $5.828$ & $5.000,\ 5.109,\ 5.188,\ 5.234,\ 5.500$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Pruning the enumeration}
+The same conditions give $\theta_1-\tau\le-a$ and $\theta_d-\tau\ge b$.  Two consequences can be
+tested inside the Rolle tree, and they remove only subtrees without admissible leaves:
+\begin{itemize}[leftmargin=*]
+\item every even centred power sum satisfies $M_k=\sum_j(\theta_j-\tau)^k\ge a^k+b^k$, and $M_4$,
+  $M_6$ are fixed at depths $4$, $6$;
+\item the middle conjugates lie in $\tau\pm r$ with $r^2=S-a^2-b^2$.  Since the $i$-th root of
+  $f^{(d-m)}$ lies in $[\theta_i,\theta_{i+d-m}]$, the roots $2,\dots,m-1$ of $g_m$ lie in that
+  window.
+\end{itemize}
+The enumerator output is unchanged bit for bit.  In degree $6$ the number of leaves drops
+from $2\,088\,667$ to $178\,438$.  In degree $7$ it drops from $533\,562\,406$ to $7\,577\,940$,
+and the running time from about $25$ minutes to about $1$ minute on $4$ cores.
+
+\subsection{Degree 8: what remains}
+Everything above holds for $d=8$: tensor rank $\le7$ gives $s/\gamma_s^2\ge\frac32$.
+\begin{itemize}[leftmargin=*]
+\item\emph{Case B, quartic $F$.}  The enumeration in degree $4$ with the NS and BC tests leaves
+  $10$ quartic fields.  For $7$ of them the window non-squares cannot all become squares in
+  one quadratic extension, so they are impossible.  $\Q(\sqrt2,\sqrt5)$ is impossible because
+  its only shortest vector lies in $\Q(\sqrt5)$.  $\Q(\zeta_{16})^+$ forces
+  $K=\Q(\zeta_{32})^+$ and $\Q(\zeta_{24})^+$ forces $K=\Q(\zeta_{48})^+$; both fail the
+  sharpened rigidity.
+\item\emph{Case B, quadratic $F$.}  $F=\Q(\sqrt2)$ forces $\Q(\zeta_{16})^+\subset K$, and hence
+  $K=\Q(\zeta_{32})^+$.  $F=\Q(\sqrt5)$ remains: it needs an enumeration of relative quartics
+  with $\nurel\le4.21$ (Corollary~\ref{cor:relbound}, $e=4$).
+\item\emph{Case A.}  Octic polynomials with $\nu\le5.5$ (refined bound; for $\Tr x_1=0$ this
+  means $a_2\ge-20$).  With the pruning and the sharpened tests, the subtree
+  $(a_1,a_2)=(0,-12)$ takes $40$ seconds and $(0,-14)$ takes $143$ seconds ($1.15\cdot10^7$
+  leaves), but $(0,-16)$ did not finish within $25$ minutes.  Extrapolating, the full run is
+  days to weeks on $4$ cores.  In the middle range of $\nu$ the downspread conditions are not
+  yet restrictive enough to prune the tree, so degree $8$ needs a further theoretical input
+  before Case A is practical.
+\end{itemize}
+
 \section{Consistency checks and status}\label{sec:status}
 
 \begin{itemize}[leftmargin=*]
@@ -578,6 +702,10 @@ Springer, 2004, 327--337.
 \bibitem[Mo]{Mo}
 L.~J. Mordell, The representation of a definite quadratic form as a sum of two others,
 Ann. of Math. 38 (1937), 751--757.
+
+\bibitem[Oh]{Oh}
+B.-K. Oh, Universal $\Z$-lattices of minimal rank, Proc. Amer. Math. Soc. 128 (2000),
+683--689.
 
 \bibitem[Pack]{Pack}
 \emph{Flatness, variance, and the lifting problem}, working notes (unpublished).
