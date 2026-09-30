@@ -1,0 +1,4 @@
+subtrees 15, compared 15, timed out 0
+plain 33  split 1  only-plain 32  only-split 0
+only-plain: ["reducible", 30; "sqrt-fails-budget", 2]
+only-split: [;]

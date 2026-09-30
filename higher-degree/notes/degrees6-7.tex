@@ -777,6 +777,27 @@ quartic fields $F'$ (grid step $0.1$).
   ($d_K=725,1600,7168$), all failing (N).  This recovers \cite[Thm.~1.2]{KY-EB}.
 \item \textbf{Controls.}  (N) holds for all tested elements of $\Q(\sqrt5)$ and
   $\Q(\zeta_7)^+$; both fields survive every filter.
+\item \textbf{Degree 8} (\file{validate8.sh}).
+  \begin{enumerate}[label=(\alph*)]
+  \item Every exclusion made inside the split enumerator on an irreducible polynomial is
+    re-checked in exact arithmetic (\file{verify\_split.gp}, \texttt{vsharp}).  There are
+    $108\,159$ of them (NS $24$, sharpened RIG $107\,539$, $y$-budget $596$), with no
+    disagreement.  The other $484\,381$ excluded polynomials are reducible.
+  \item At every one of the $392$ maximal-order exclusions (Case A: $4$ RG2; Case B:
+    $386$ RGR2, $2$ BCR), condition (N) is decided directly at the element named by the test
+    (\file{certN8.gp}).  It fails in all $392$ cases, so every excluded octic field has two
+    independent certificates.
+  \item The relative-quartic candidates of \texttt{enum\_q4} coincide, for all $16$ residues
+    of $c_1$, with an independent brute-force search (\file{check\_q4.gp}).  That search uses
+    power-sum boxes for $c_2,c_3,c_4$ and an exact real-rootedness test via the norm
+    polynomial and Sturm sequences.  No candidate is missing, and none is superfluous.
+  \item The rung split was compared with the plain enumerator on all $90$ subtrees with
+    $S\le36$ (\file{compare\_split.sh}).  Every polynomial found by only one of the runs is
+    reducible, or certified exactly: its forced side has no square root, or the square root
+    violates budget--cost.  The $25$ subtrees with $36<S\le8(3+2\sqrt2)$ were not compared,
+    because the plain run is too slow there (the subtree $(-4,-11)$ with $S=36$ takes
+    $52$ minutes).
+  \end{enumerate}
 \item \textbf{Floating point.}  Used for embeddings (60 digits), for root brackets in the
   enumerator (80-bit, with margins), and for $\delta_F$ (double precision with a grid margin
   of $0.002$ resp.\ $0.02$).  The grid values $\delta_{\Q(\sqrt5)}\approx1.3090=\varphi^2/2$ and

@@ -167,6 +167,22 @@ hours on 4 cores, mostly the relative quartics and the maximal-order tests of 39
   48 subtrees with the fewest leaves (2,267,434 leaves).
   `validate.sh D` reruns these checks.
 
+### Degree 8 checks (`validate8.sh`)
+
+* **Case A exclusions re-checked exactly.** All 108,159 exclusions of irreducible
+  polynomials made inside the split enumerator (NS, sharpened RIG, y-budget) were redone in
+  exact arithmetic (`verify_split.gp`), with 0 disagreements. The other 484,381 excluded
+  polynomials are reducible.
+* **Condition (N) checked directly.** For all 392 field exclusions (Case A: 4 RG2;
+  Case B: 386 RGR2, 2 BCR), `certN8.gp` decides (N) at the element the test names. (N)
+  fails in every case, so each excluded octic field has a second, independent certificate.
+* **Relative-quartic candidates confirmed by brute force.** `check_q4.gp` searches
+  power-sum boxes and tests real-rootedness exactly (norm polynomial, Sturm). For all 16
+  residues of c₁ it returns exactly the candidate set of `enum_q4`.
+* **Split versus plain enumeration.** The two agree on all 90 subtrees with S ≤ 36
+  (`compare_split.sh`), up to polynomials that are reducible or certified exactly. The
+  remaining 25 subtrees are too slow for the plain run.
+
 ## Files
 
 ```
@@ -190,6 +206,10 @@ src/rel8.gp             degree-8 Case B over Q(sqrt5): relative quartics, interm
 src/run_q4_par.sh       parallel driver for the relative quartics
 src/collect8.gp         maximal-order tests (fieldtest2) for the Case B survivors
 src/witness_k1_d8.gp    (N) search for the degree-8 field of discriminant 5^4 29^4
+src/certN8.gp           (N) decided at every degree-8 exclusion certificate
+src/check_q4.gp         brute-force check of the relative-quartic candidates
+src/compare_split.sh    rung split versus plain enumeration, differences certified
+validate8.sh            the degree-8 checks
 src/run_enum.sh         runs the enumerator over all (a1,a2)
 src/enum_check.gp       exact re-implementation of the enumerator, for validation
 src/lift6.gp            variance lattice of an order: nu, totally positive elements of small

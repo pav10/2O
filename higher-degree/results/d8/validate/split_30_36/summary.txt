@@ -1,0 +1,4 @@
+subtrees 15, compared 15, timed out 0
+plain 7  split 1  only-plain 6  only-split 0
+only-plain: Mat(["reducible", 6])
+only-split: [;]

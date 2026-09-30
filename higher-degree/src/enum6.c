@@ -248,9 +248,13 @@ static int rig_violation(const ld *th, long *nout)
     return 0;
 }
 
+static int USEX = 0;              /* y-mode: printpoly prints the x-polynomial XCO[] */
+static long long XCO[N + 1];
+
 static void printpoly(const char *tag, long extra)
 {
     if (tag) printf("%s %ld ", tag, extra);
+    if (USEX) { for (int i = 1; i <= N; i++) printf("%lld%c", XCO[i], i == N ? '\n' : ' '); return; }
     for (int i = 1; i <= N; i++) printf("%ld%c", a[i], i == N ? '\n' : ' ');
 }
 
@@ -263,8 +267,9 @@ static int xfilters(const ld *th)      /* x-context filters; returns 1 if th pas
     if (N >= 3 && quad_violation(th)) { n_f3++; return 0; }
     if (STRONG) {
         long nn = 0;
-        if (N >= 3 && ns_violation(th)) { n_ns++; return 0; }
-        if (rig_violation(th, &nn)) { n_rig++; return 0; }
+        int rv;
+        if (N >= 3 && ns_violation(th)) { n_ns++; if (WHY) printpoly("NS", 0); return 0; }
+        if ((rv = rig_violation(th, &nn))) { n_rig++; if (WHY) printpoly(rv == 1 ? "RIGM" : "RIGP", nn); return 0; }
     }
     return 1;
 }
@@ -273,7 +278,11 @@ static int xfilters(const ld *th)      /* x-context filters; returns 1 if th pas
 static void yleaf(ld *th)
 {
     /* y itself is a non-rational element of O_K: its downspreads are >= nu(K) = NU */
-    if (TAU - (ceill(th[0]) - 1) < NU - 1e-7L || (floorl(th[N - 1]) + 1) - TAU < NU - 1e-7L) { n_ybud++; return; }
+    if (TAU - (ceill(th[0]) - 1) < NU - 1e-7L || (floorl(th[N - 1]) + 1) - TAU < NU - 1e-7L) {
+        n_ybud++;
+        if (WHY) printpoly(YMODE == 1 ? "YBL" : "YBU", YN);     /* y-polynomial, rung n */
+        return;
+    }
     ld xs[N], mn = 1e30L;
     for (int j = 0; j < N; j++) {
         ld q = th[j] * th[j];
@@ -283,11 +292,6 @@ static void yleaf(ld *th)
     if (mn > 1 + 1e-9L) { n_rung++; return; }          /* wrong rung (another rung covers it) */
     for (int i = 1; i < N; i++)                          /* sort ascending */
         for (int j = i; j > 0 && xs[j] < xs[j - 1]; j--) { ld t = xs[j]; xs[j] = xs[j - 1]; xs[j - 1] = t; }
-    ld st = TAU, sv = VAR;
-    TAU = TAUX; VAR = VARX;
-    int ok = xfilters(xs);
-    TAU = st; VAR = sv;
-    if (!ok) return;
     /* exact coefficients of the x-polynomial from the integer y-polynomial g = a[]:
      * g(t) = E(t^2) + t O(t^2), prod (u - y_j^2) = (-1)^N (E(u)^2 - u O(u)^2) =: G(u);
      * lower: X(t) = G(t - n);  upper: X(t) = (-1)^N G(n - t). */
@@ -325,8 +329,13 @@ static void yleaf(ld *th)
             if (fabsl(c[k] - (ld)X[N - k]) > 1e-4L * (1 + fabsl(c[k])))
                 fprintf(stderr, "NOTE: numerical/exact mismatch at coefficient %d (%Lg vs %Lg)\n", k, c[k], (ld)X[N - k]);
     }
-    n_out++;
-    for (int k = 1; k <= N; k++) printf("%lld%c", (long long)X[N - k], k == N ? '\n' : ' ');
+    for (int k = 1; k <= N; k++) XCO[k] = (long long)X[N - k];
+    ld st = TAU, sv = VAR;
+    TAU = TAUX; VAR = VARX; USEX = 1;
+    int ok = xfilters(xs);
+    TAU = st; VAR = sv;
+    if (ok) { n_out++; printpoly(WHY ? "OUT" : NULL, 0); }
+    USEX = 0;
 }
 
 static void leaf(void)
