@@ -44,6 +44,19 @@ static long a[N + 1];
 static ld Cb[N + 1][N + 1];
 static ld Rt[N + 1][N + 1];      /* Rt[m][0..m-1]: roots of g_m, ascending */
 static ld LB, UB, SMAX, TAU, VAR;
+/* ---- split modes (sharpened rigidity), see notes: "Case A pruning" ------------------
+ * m := min(3/2 V, V + 3/4).  With n = ceil(theta_1) - 1 and tau_- = tau - n:
+ *  if tau_- < m then x_1 - n = y^2 with y in O_K (square dichotomy), tau(y)^2 <= tau_- - V,
+ *     sum y^2 = d tau_-, sum y^4 = S + d tau_-^2;           -> mode YL (enumerate y)
+ *  symmetrically n' - x_1 = y^2 if n' - tau < m (n' = floor(theta_d) + 1)  -> mode YU
+ *  otherwise theta_1 <= floor(tau - m) + 1 and theta_d >= ceil(tau + m) - 1 -> mode X
+ * The three modes together cover every admissible x_1.
+ * NU is the budget threshold nu(K) = Var(x_1) (= VAR except in the y-enumeration). */
+static int YMODE = 0, XSPLIT = 0;
+static long YN = 0;                 /* rung: x_1 = YN + y^2 (YL) or YN - y^2 (YU) */
+static long long YP4 = 0;           /* pinned power sum p_4(y) */
+static ld TAUX = 0, VARX = 0, NU = 0, XA = 0, XB = 0;
+static long long n_rung = 0, n_ybud = 0;
 static long long n_leaf = 0, n_out = 0, n_f1 = 0, n_f2 = 0, n_f3 = 0, n_ns = 0, n_rig = 0;
 static int NOFILTER = 0, STRONG = 0, WHY = 0, SHARP = 0;
 /* moment pruning (only when filters are on): F1/F2 force theta_1 - tau <= -AA and
@@ -241,6 +254,81 @@ static void printpoly(const char *tag, long extra)
     for (int i = 1; i <= N; i++) printf("%ld%c", a[i], i == N ? '\n' : ' ');
 }
 
+static int xfilters(const ld *th)      /* x-context filters; returns 1 if th passes */
+{
+    ld dm = TAU - (ceill(th[0]) - 1);
+    if (dm < VAR - 1e-7L) { n_f1++; return 0; }
+    ld dp = (floorl(th[N - 1]) + 1) - TAU;
+    if (dp < VAR - 1e-7L) { n_f2++; return 0; }
+    if (N >= 3 && quad_violation(th)) { n_f3++; return 0; }
+    if (STRONG) {
+        long nn = 0;
+        if (N >= 3 && ns_violation(th)) { n_ns++; return 0; }
+        if (rig_violation(th, &nn)) { n_rig++; return 0; }
+    }
+    return 1;
+}
+
+/* leaf of the y-enumeration: th = conjugates of y (ascending) */
+static void yleaf(ld *th)
+{
+    /* y itself is a non-rational element of O_K: its downspreads are >= nu(K) = NU */
+    if (TAU - (ceill(th[0]) - 1) < NU - 1e-7L || (floorl(th[N - 1]) + 1) - TAU < NU - 1e-7L) { n_ybud++; return; }
+    ld xs[N], mn = 1e30L;
+    for (int j = 0; j < N; j++) {
+        ld q = th[j] * th[j];
+        if (q < mn) mn = q;
+        xs[j] = (YMODE == 1) ? YN + q : YN - q;
+    }
+    if (mn > 1 + 1e-9L) { n_rung++; return; }          /* wrong rung (another rung covers it) */
+    for (int i = 1; i < N; i++)                          /* sort ascending */
+        for (int j = i; j > 0 && xs[j] < xs[j - 1]; j--) { ld t = xs[j]; xs[j] = xs[j - 1]; xs[j - 1] = t; }
+    ld st = TAU, sv = VAR;
+    TAU = TAUX; VAR = VARX;
+    int ok = xfilters(xs);
+    TAU = st; VAR = sv;
+    if (!ok) return;
+    /* exact coefficients of the x-polynomial from the integer y-polynomial g = a[]:
+     * g(t) = E(t^2) + t O(t^2), prod (u - y_j^2) = (-1)^N (E(u)^2 - u O(u)^2) =: G(u);
+     * lower: X(t) = G(t - n);  upper: X(t) = (-1)^N G(n - t). */
+    __int128 E[N + 1], O[N + 1], G[N + 1], X[N + 1];
+    for (int k = 0; k <= N; k++) E[k] = O[k] = G[k] = X[k] = 0;      /* index = power of u */
+    for (int i = 0; i <= N; i++) {
+        int pw = N - i;                                             /* power of t */
+        if (pw % 2 == 0) E[pw / 2] += a[i]; else O[(pw - 1) / 2] += a[i];
+    }
+    for (int p = 0; p <= N; p++) for (int q = 0; q <= N; q++) {
+        if (p + q <= N) G[p + q] += E[p] * E[q];
+        if (p + q + 1 <= N) G[p + q + 1] -= O[p] * O[q];
+    }
+    if (N % 2) for (int k = 0; k <= N; k++) G[k] = -G[k];
+    /* substitute u = s*t + c  with (s,c) = (1,-n) lower, (-1,n) upper; Horner in t */
+    long sg = (YMODE == 1) ? 1 : -1, cc = (YMODE == 1) ? -YN : YN;
+    for (int k = N; k >= 0; k--) {
+        /* X := X * (sg t + cc) + G[k] */
+        __int128 T[N + 1];
+        for (int j = 0; j <= N; j++) T[j] = 0;
+        for (int j = 0; j < N; j++) { T[j + 1] += X[j] * sg; T[j] += X[j] * cc; }
+        for (int j = 0; j <= N; j++) X[j] = T[j];
+        X[0] += G[k];
+    }
+    if (YMODE == 2 && N % 2) for (int k = 0; k <= N; k++) X[k] = -X[k];
+    if (X[N] != 1) { fprintf(stderr, "WARNING: x-polynomial not monic\n"); return; }
+    /* cross-check against the numerical roots */
+    {
+        ld c[N + 1];
+        for (int k = 0; k <= N; k++) c[k] = 0;
+        c[0] = 1;
+        for (int j = 0; j < N; j++)
+            for (int k = j + 1; k >= 1; k--) c[k] -= xs[j] * c[k - 1];
+        for (int k = 1; k <= N; k++)
+            if (fabsl(c[k] - (ld)X[N - k]) > 1e-4L * (1 + fabsl(c[k])))
+                fprintf(stderr, "NOTE: numerical/exact mismatch at coefficient %d (%Lg vs %Lg)\n", k, c[k], (ld)X[N - k]);
+    }
+    n_out++;
+    for (int k = 1; k <= N; k++) printf("%lld%c", (long long)X[N - k], k == N ? '\n' : ' ');
+}
+
 static void leaf(void)
 {
     ld br[N + 2], th[N];
@@ -249,12 +337,14 @@ static void leaf(void)
     for (int i = 0; i < N - 1; i++) br[i + 1] = Rt[N - 1][i];
     br[N] = UB;
     for (int i = 0; i < N; i++) th[i] = findroot(N, br[i], br[i + 1]);
+    if (YMODE) { yleaf(th); return; }
     if (NOFILTER) { n_out++; for (int i = 1; i <= N; i++) printf("%ld%c", a[i], i == N ? '\n' : ' '); return; }
     /* F1: downspread.  theta_min is never an integer for irreducible f. */
     ld dm = TAU - (ceill(th[0]) - 1);
-    if (dm < VAR - 1e-7L) { n_f1++; return; }
+    if (dm < NU - 1e-7L) { n_f1++; return; }
     ld dp = (floorl(th[N - 1]) + 1) - TAU;
-    if (dp < VAR - 1e-7L) { n_f2++; return; }
+    if (dp < NU - 1e-7L) { n_f2++; return; }
+    if (XSPLIT && (th[0] > XA + 1e-9L || th[N - 1] < XB - 1e-9L)) { n_rung++; return; }
     if (N >= 3 && quad_violation(th)) { n_f3++; return; }   /* P(x_1) non-rational needs deg x_1 >= 3 */
     if (STRONG) {
         long nn = 0; int rv;
@@ -300,6 +390,16 @@ static void rec(int m)
     }
     long amin = (long)ceill(lo - EPS * (1 + fabsl(lo)));
     long amax = (long)floorl(hi + EPS * (1 + fabsl(hi)));
+    if (YMODE && m == 4) {
+        /* Newton: p4 = e1 p3 - e2 p2 + e3 p1 - 4 e4 with e_i = (-1)^i a_i; p4 is pinned */
+        long long e1 = -a[1], e2 = a[2], e3 = -a[3];
+        long long p1 = e1, p2 = e1 * p1 - 2 * e2, p3 = e1 * p2 - e2 * p1 + 3 * e3;
+        long long num = e1 * p3 - e2 * p2 + e3 * p1 - YP4;
+        if (num % 4 != 0) return;
+        long a4 = (long)(num / 4);
+        if (a4 < amin || a4 > amax) return;
+        amin = amax = a4;
+    }
     for (long am = amin; am <= amax; am++) {
         a[m] = am;
         if (m == N) { leaf(); continue; }
@@ -324,6 +424,50 @@ static void rec(int m)
         rec(m + 1);
     }
     a[m] = 0;
+}
+
+/* run the y-enumeration for all forced rungs; mode 1 = lower (x = n + y^2), 2 = upper (x = n - y^2) */
+static int yrun(int mode, ld SX, ld mm)
+{
+    long a1x = a[1], a2x = a[2];
+    YMODE = mode; TAUX = TAU; VARX = VAR; NU = VAR;
+    long long SXN = (long long)(N - 1) * a1x * a1x - 2LL * N * a2x;      /* N * S_x, exact */
+    /* rungs: T = tau - n (lower) or n - tau (upper) in [V, mm) */
+    long nlo = (long)floorl(-4 * (SX + 10)) , nhi = -nlo;
+    for (long n = nlo; n <= nhi; n++) {
+        ld T = (mode == 1) ? TAUX - n : n - TAUX;
+        if (T < VARX - 1e-12L || T >= mm + 1e-12L) continue;
+        long long p2 = (mode == 1) ? (long long)(-a1x) - (long long)N * n : (long long)N * n + a1x;   /* = N T */
+        long long p4N = SXN + p2 * p2;                  /* N * p4 */
+        if (p4N % N != 0) continue;
+        YP4 = p4N / N; YN = n;
+        long smax = (long)floorl(N * sqrtl(fmaxl(T - VARX, 0)) + 1e-9L);
+        for (long sy = 0; sy <= smax; sy++) {
+            if ((sy * sy - p2) % 2 != 0) continue;
+            a[1] = -sy; a[2] = (sy * sy - p2) / 2;
+            ld Sy = (ld)p2 - (ld)sy * sy / N;              /* centred T2 of y */
+            if (Sy <= 0) continue;
+            TAU = (ld)sy / N; VAR = Sy / N;
+            AA = TAU - floorl(TAU - NU + 1 + 1e-12L);
+            BB = ceill(TAU + NU - 1 - 1e-12L) - TAU;
+            MIDR = -1;
+            if (NU <= 1) AA = BB = 0;
+            if (AA > 0 && BB > 0) {
+                ld r2 = Sy - AA * AA - BB * BB;
+                if (r2 < -1e-9L) continue;
+                MIDR = sqrtl(r2 > 0 ? r2 : 0) * (1 + 1e-12L) + 1e-12L;
+            }
+            ld rad = sqrtl((N - 1) * Sy / N);
+            LB = TAU - rad - 0.01L; UB = TAU + rad + 0.01L;
+            Rt[1][0] = TAU;
+            ld br[3] = {LB, TAU, UB};
+            for (int i = 0; i < 2; i++) Rt[2][i] = findroot(2, br[i], br[i + 1]);
+            rec(3);
+        }
+    }
+    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf mode=%s leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld ybud=%lld rung=%lld out=%lld pruned=%lld\n",
+            a1x, a2x, SX, mode == 1 ? "YL" : "YU", n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_ybud, n_rung, n_out, n_prune);
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -351,11 +495,26 @@ int main(int argc, char **argv)
     if (S <= 0 || S > SMAX) return 0;
     TAU = -(ld)a[1] / N;
     VAR = S / N;
+    NU = VAR;
+    if (argc > 5) {
+        ld mm = 1.5L * VAR < VAR + 0.75L ? 1.5L * VAR : VAR + 0.75L;
+        if (!strcmp(argv[5], "X")) {
+            XSPLIT = 1;
+            XA = floorl(TAU - mm + 1e-12L) + 1;
+            XB = ceill(TAU + mm - 1e-12L) - 1;
+        } else if (!strcmp(argv[5], "YL") || !strcmp(argv[5], "YU")) {
+            return yrun(argv[5][1] == 'L' ? 1 : 2, S, mm);
+        }
+    }
     ld rad = sqrtl((N - 1) * S / N);
     /* integers L = floor(tau - V + 1), U = ceil(tau + V - 1) (rounded conservatively) */
     AA = TAU - floorl(TAU - VAR + 1 + 1e-12L);
     BB = ceill(TAU + VAR - 1 - 1e-12L) - TAU;
     if (VAR <= 1) AA = BB = 0;
+    if (XSPLIT) {
+        if (TAU - XA > AA) AA = TAU - XA;
+        if (XB - TAU > BB) BB = XB - TAU;
+    }
     if (!NOFILTER && AA > 0 && BB > 0) {
         ld r2 = S - AA * AA - BB * BB;
         if (r2 < -1e-9L) {       /* no leaf can pass F1 and F2 */
@@ -375,7 +534,7 @@ int main(int argc, char **argv)
         for (int i = 0; i < 2; i++) Rt[2][i] = findroot(2, br[i], br[i + 1]);
         rec(3);
     }
-    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld out=%lld pruned=%lld\n",
-            a[1], a[2], S, n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_out, n_prune);
+    fprintf(stderr, "a1=%ld a2=%ld S=%.4Lf%s leaves=%lld F1=%lld F2=%lld F3=%lld NS=%lld RIG=%lld rung=%lld out=%lld pruned=%lld\n",
+            a[1], a[2], S, XSPLIT ? " mode=X" : "", n_leaf, n_f1, n_f2, n_f3, n_ns, n_rig, n_rung, n_out, n_prune);
     return 0;
 }

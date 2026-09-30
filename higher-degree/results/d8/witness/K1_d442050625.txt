@@ -1,0 +1,25 @@
+22 elements with tau < 5/2
+1 Tr=12 x^2 - 3*x + 1 -> holds  0ms
+2 Tr=12 x^2 - 3*x + 1 -> holds  0ms
+3 Tr=14 x^4 - 7*x^3 + 13*x^2 - 7*x + 1 -> holds  1ms
+4 Tr=14 x^4 - 7*x^3 + 13*x^2 - 7*x + 1 -> holds  0ms
+5 Tr=14 x^4 - 7*x^3 + 13*x^2 - 7*x + 1 -> holds  0ms
+6 Tr=14 x^4 - 7*x^3 + 13*x^2 - 7*x + 1 -> holds  1ms
+7 Tr=16 x^4 - 8*x^3 + 18*x^2 - 13*x + 1 -> holds  0ms
+8 Tr=16 x^4 - 8*x^3 + 18*x^2 - 13*x + 1 -> holds  0ms
+9 Tr=16 x^4 - 8*x^3 + 18*x^2 - 13*x + 1 -> holds  0ms
+10 Tr=16 x^4 - 8*x^3 + 18*x^2 - 13*x + 1 -> holds  1ms
+11 Tr=18 x^4 - 9*x^3 + 25*x^2 - 25*x + 7 -> undecided (stack)  9891ms
+12 Tr=18 x^4 - 9*x^3 + 25*x^2 - 25*x + 7 -> undecided (stack)  12375ms
+13 Tr=18 x^4 - 9*x^3 + 25*x^2 - 25*x + 7 -> undecided (stack)  8424ms
+14 Tr=18 x^4 - 9*x^3 + 25*x^2 - 25*x + 7 -> undecided (stack)  8560ms
+15 Tr=18 x^4 - 9*x^3 + 22*x^2 - 16*x + 1 -> holds  0ms
+16 Tr=18 x^4 - 9*x^3 + 22*x^2 - 16*x + 1 -> holds  1ms
+17 Tr=18 x^4 - 9*x^3 + 22*x^2 - 16*x + 1 -> holds  0ms
+18 Tr=18 x^4 - 9*x^3 + 22*x^2 - 16*x + 1 -> holds  1ms
+19 Tr=18 x^4 - 9*x^3 + 27*x^2 - 31*x + 11 -> undecided (stack)  9564ms
+20 Tr=18 x^4 - 9*x^3 + 27*x^2 - 31*x + 11 -> undecided (stack)  8613ms
+21 Tr=18 x^4 - 9*x^3 + 27*x^2 - 31*x + 11 -> FAILS (N)  5495ms
+WITNESS 2/21*x^7 + 1/3*x^6 - 31/21*x^5 - 22/7*x^4 + 23/3*x^3 + 18/7*x^2 - 17/3*x + 43/21
+
+[exited with code 0]

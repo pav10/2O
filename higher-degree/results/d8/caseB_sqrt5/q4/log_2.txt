@@ -1,0 +1,1 @@
+relative quartics over Q(sqrt5): 48213 candidates in the boxes; ["BCR", 544; "NSR", 182; "OK", 134; "RD", 46388]

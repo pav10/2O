@@ -1,16 +1,16 @@
-# Higher degree: the lifting problem in degrees 6 and 7
+# Higher degree: the lifting problem in degrees 6, 7 and 8
 
 This folder extends the degree ≤ 5 classification of
 Kala–Yatsyna, *Even better sums of squares over quintic and cyclotomic fields*
-(arXiv:2402.03850), to degrees 6 and 7.
+(arXiv:2402.03850), to degrees 6, 7 and 8.
 
-**Result.** No totally real field of degree 6 or 7 admits a universal ℤ-form.
-Together with the degree ≤ 5 theorem, the totally real fields of degree ≤ 7 with a
+**Result.** No totally real field of degree 6, 7 or 8 admits a universal ℤ-form.
+Together with the degree ≤ 5 theorem, the totally real fields of degree ≤ 8 with a
 universal ℤ-form are exactly ℚ, ℚ(√5) and ℚ(ζ₇+ζ₇⁻¹).
 
 The write-up with all proofs is [`notes/degrees6-7.pdf`](notes/degrees6-7.pdf)
 (source [`notes/degrees6-7.tex`](notes/degrees6-7.tex)). The verification status
-is listed in §8 of the notes.
+is listed in §9 of the notes (degree 8: §8.5–8.6).
 
 ## Why the degree ≤ 5 method does not extend, and what replaces it
 
@@ -98,16 +98,56 @@ pruning of §8 of the notes. The output is identical to the original ~30 minute 
 * **Tree pruning** (always on in filtered modes). Even centred moments satisfy
   M₄, M₆ ≥ aᵏ + bᵏ, and the middle roots lie in a window. The output is unchanged bit for
   bit, and the leaf count drops: degree 6 from 2.09M to 0.18M, degree 7 from 534M to 7.6M.
-* **Degree 8 status:**
-  * Case B, quartic F: 10 candidates. 7 are impossible, ℚ(√2,√5) is excluded, and
-    ℚ(ζ₁₆)⁺ and ℚ(ζ₂₄)⁺ force K = ℚ(ζ₃₂)⁺ and ℚ(ζ₄₈)⁺, which both fail rigidity.
-  * Case B, quadratic F: ℚ(√2) forces ℚ(ζ₃₂)⁺. **ℚ(√5) is the only open subcase**, needing
-    an enumeration of relative quartics.
-  * **Case A is still too expensive.** The subtree (a₁,a₂) = (0,−16) takes over 25 minutes,
-    and the range goes down to a₂ = −20.
 
 The second paper (arXiv 0807.2099, hosted on hbs.edu) could not be downloaded from this
 environment because both hosts are blocked, so it is not used here.
+
+## Degree 8
+
+**Case A (x₁ generates K): the rung split.** Let n = ⌈θ₁⌉ − 1, the lower rung, and
+m = min(3ν/2, ν + 3/4). If τ(x₁ − n) < m, the square dichotomy makes x₁ − n = y² with
+y ∈ O_K. Then one enumerates y instead of x₁: p₂(y) and p₄(y) are fixed, and |p₁(y)| is
+small. The upper rung is symmetric. Otherwise both extreme conjugates lie a full unit
+further out (θ₁ ≤ ⌊τ−m⌋+1, θ₈ ≥ ⌈τ+m⌉−1), and the tree pruning then collapses the tree.
+`enum6.c` takes the arguments `X`, `YL` and `YU` for the three modes.
+
+| step | count |
+|---|---|
+| leaves (all three modes, ν ≤ 3+2√2) | 6,012,361 (37 s on 4 cores; the plain run was days) |
+| distinct polynomials / irreducible | 13,187 / 82 |
+| exact tests in ℤ[x₁]: NS / BC / RG | 7 / 1 / 70 |
+| maximal order (4 fields) | all fail sharpened rigidity |
+
+Validation: on all 60 subtrees with S ≤ 24, every difference between the split run and
+the plain run is either reducible or certified by `verify_split.gp` (99 + 5 and 46).
+Degrees 6 and 7 were checked the same way.
+
+**Case B (x₁ in a subfield F).**
+
+* **Square forcing** (`sqforce8.gp`): every window element of F must be a square in K.
+  * Of the 10 quartic F that pass NS/BC, 6 have ν(O_F) < Var(x₁). The other 4 force an
+    octic field that still has a window non-square.
+  * ℚ(√2) forces ℚ(ζ₁₆)⁺, then ℚ(ζ₃₂)⁺, which again has a window non-square.
+  * ℚ(√5) forces nothing.
+* **F = ℚ(√5)** (`rel8.gp`), with ν_{K/F} ≤ 4.21:
+  * *Relative quartics* (`run_q4_par.sh`): 468,986 in the boxes. The exact relative
+    downspread test (with the actual covering value for each target) removes 450,708.
+    NSR/BCR removes 7,316, and 815 remain. Only 10 residues of c₁ mod 4 are needed, by
+    √5 ↦ −√5.
+  * *Intermediate quartic F′ = F(β)*: only d = 725 and ℚ(√2,√5) remain, and neither forces
+    anything. The relative quadratics K/F′ (`enum_e2g8`, with an exact relative downspread
+    prefilter) leave 52 + 97.
+  * The 964 survivors give 390 fields. 386 fail relative sharpened rigidity (RGR2), 2 fail BCR,
+    and 2 survive. Both fail condition (N) at α of trace 18 in the quartic subfield of
+    discriminant 725 (minimal polynomial x⁴−9x³+27x²−31x+11):
+
+| K | d_K | note |
+|---|---|---|
+| x⁸−2x⁷−12x⁶+26x⁵+17x⁴−36x³−5x²+11x−1 | 5⁴·29⁴ | Galois closure (D₄) of the quartic of discriminant 725 |
+| x⁸−3x⁷−4x⁶+13x⁵+5x⁴−13x³−4x²+3x+1 | 5⁴·29²·1249 | non-Galois quadratic extension of that quartic |
+
+`run_degree8.sh` reproduces everything. Case A takes about 1 minute. Case B takes about 2–3
+hours on 4 cores, mostly the relative quartics and the maximal-order tests of 390 fields.
 
 ## Checks
 
@@ -132,6 +172,7 @@ environment because both hosts are blocked, so it is not used here.
 ```
 run_degree6.sh          end-to-end reproduction, degree 6 (gcc, PARI/GP >= 2.15, python3+numpy)
 run_degree7.sh          end-to-end reproduction, degree 7
+run_degree8.sh          end-to-end reproduction, degree 8
 run_sanity.sh           the same machinery in degrees 2-5 (answer key: Kala-Yatsyna)
 validate.sh D           independent checks (exact re-check of C exclusions, enumerator)
 src/enum6.c             Robinson/Rolle enumerator (compile with -DDEG=d); root filters and
@@ -141,6 +182,14 @@ src/run_enum_par.sh     parallel driver for the enumerator
 src/verify_strong.gp    exact re-check of the NS/RIG exclusions made in C
 src/sharp.gp            sharpened rigidity (kappa >= 0): sqshape2, oshape2, fieldtest2
 src/refined_bound.py    integrality-refined bound for nu per trace class
+src/run_split_par.sh    degree-8 Case A: rung-split enumeration (modes X, YL, YU)
+src/verify_split.gp     exact certificate for polynomials excluded only by the split
+src/sqforce8.gp         Case B square forcing (subfields F, forced quadratic extensions)
+src/rel8.gp             degree-8 Case B over Q(sqrt5): relative quartics, intermediate F',
+                        relative quadratics over F' with exact relative downspread
+src/run_q4_par.sh       parallel driver for the relative quartics
+src/collect8.gp         maximal-order tests (fieldtest2) for the Case B survivors
+src/witness_k1_d8.gp    (N) search for the degree-8 field of discriminant 5^4 29^4
 src/run_enum.sh         runs the enumerator over all (a1,a2)
 src/enum_check.gp       exact re-implementation of the enumerator, for validation
 src/lift6.gp            variance lattice of an order: nu, totally positive elements of small
@@ -157,7 +206,7 @@ results/                all outputs (status of every candidate, survivors, witne
 notes/                  LaTeX write-up
 ```
 
-## Next: degree 8
+## Next: degree 9
 
-See "Sharpenings" above. The only open Case B subcase is F = ℚ(√5), which needs relative
-quartics with ν_{K/F} ≤ 4.21. Case A needs further pruning before it is practical.
+The tensor floor, the square dichotomy and the rung split all still hold (tensor rank ≤ 8).
+The new ingredient is cubic subfields with relative degree 3.

@@ -69,14 +69,19 @@ No totally real number field of degree $6$ admits a universal $\Z$-form.
 No totally real number field of degree $7$ admits a universal $\Z$-form.
 \end{theorem}
 
+\begin{theorem}\label{thm:eight}
+No totally real number field of degree $8$ admits a universal $\Z$-form.
+\end{theorem}
+
 \begin{corollary}\label{cor:le6}
-A totally real field of degree $d\le 7$ admits a universal $\Z$-form if and only if it is
+A totally real field of degree $d\le 8$ admits a universal $\Z$-form if and only if it is
 $\Q$, $\Q(\sqrt5)$ or $\Q(\zeta_7+\zeta_7^{-1})$.
 \end{corollary}
 
 The proof has a theoretical part (\S\S\ref{sec:setup}--\ref{sec:e6}), which reduces the
 theorem to a finite computation with explicit bounds, and a computational part
-(\S\ref{sec:computation} for degree $6$, \S\ref{sec:deg7} for degree $7$).  The main
+(\S\ref{sec:computation} for degree $6$, \S\ref{sec:deg7} for degree $7$,
+\S\S\ref{sec:d8A}--\ref{sec:d8B} for degree $8$, which uses the sharpenings of \S\ref{sec:sharp}).  The main
 steps are:
 \begin{enumerate}[label=(\roman*)]
 \item The necessary condition~(N) of \cite{KY1}: every totally positive $\alpha$ is
@@ -516,7 +521,7 @@ disagreement.  \file{run\_degree7.sh} reproduces the computation in about 30 min
 
 This section records improvements found after the proofs above.  They are not needed for
 Theorems~\ref{thm:main} and~\ref{thm:seven}.  They shrink the computation considerably, and
-they are the starting point for degree $8$.
+they are used for Theorem~\ref{thm:eight} (\S\S\ref{sec:d8A}--\ref{sec:d8B}).
 
 \subsection{A single universal form}
 Oh \cite{Oh} determined minimal-rank $n$-universal lattices: $E_6\perp I_7$ and $E_7\perp I_6$
@@ -615,26 +620,146 @@ The enumerator output is unchanged bit for bit.  In degree $6$ the number of lea
 from $2\,088\,667$ to $178\,438$.  In degree $7$ it drops from $533\,562\,406$ to $7\,577\,940$,
 and the running time from about $25$ minutes to about $1$ minute on $4$ cores.
 
-\subsection{Degree 8: what remains}
-Everything above holds for $d=8$: tensor rank $\le7$ gives $s/\gamma_s^2\ge\frac32$.
+\subsection{Degree 8, Case A: the rung split}\label{sec:d8A}
+Let $x_1$ realise $\nu=\nu(K)$, with conjugates $\theta_1<\dots<\theta_d$, $\tau=\tau(x_1)$,
+and put $m=\min(\frac32\nu,\nu+\frac34)$.  Let $n=\lceil\theta_1\rceil-1$ (the \emph{lower rung}),
+so $x_1-n\succ0$ and $\tau_-=\tau-n\ge\nu$ by budget--cost.  Similarly
+$n'=\lfloor\theta_d\rfloor+1$ and $\tau_+=n'-\tau\ge\nu$.
+
+\begin{lemma}\label{lem:rung}
+Exactly one of the following holds.
+\begin{enumerate}[label=(\roman*)]
+\item[(X)] $\tau_-\ge m$ and $\tau_+\ge m$; then $\theta_1\le\lfloor\tau-m\rfloor+1$ and
+  $\theta_d\ge\lceil\tau+m\rceil-1$.
+\item[(YL)] $\tau_-<m$; then $x_1-n=y^2$ with $y\in\OK$, $\Var(y)\ge\nu$,
+  $\tau(y)^2\le\tau_--\nu$, $\sum_j y_j^2=d\tau_-$ and
+  $\sum_j y_j^4=d\,\Var(x_1)+d\tau_-^2$.
+\item[(YU)] $\tau_+<m$; then $n'-x_1=y^2$ with the same conditions.
+\end{enumerate}
+In cases (YL)/(YU) the element $y$ also satisfies the downspread conditions of
+Corollary~\ref{cor:nubound} with respect to $\nu$.
+\end{lemma}
+
+\begin{proof}
+If $\tau_-<m$, Proposition~\ref{prop:sharp}(a) makes $x_1-n$ a square $y^2$.  Then
+$\tau_-=\tau(y^2)=\Var(y)+\tau(y)^2$ with $\Var(y)\ge\nu$ (as $y\notin\Z$).  The power sums
+follow from $y_j^2=\theta_j-n$ and $\Var(x_1)=\Var(y^2)$.  If $\tau_-\ge m$, then
+$n\le\lfloor\tau-m\rfloor$ and $\theta_1\le n+1$.  The upper end is symmetric.  Both
+$\tau_\pm<m$ may hold at once; such $x_1$ are found in both (YL) and (YU).  The last
+sentence is budget--cost for $y-\lceil y_1\rceil+1$ and $\lfloor y_d\rfloor+1-y$.
+\end{proof}
+
+In mode (X) the extreme conjugates are pushed a whole unit further out than the downspread
+alone gives, which the tree pruning of the previous subsection turns into a much smaller
+tree.  In modes (YL)/(YU) one enumerates $y$ instead of $x_1$.  Here $p_2(y)=d\tau_-$ is fixed,
+$p_4(y)$ is fixed (it pins $a_4$ through Newton's identity), and $|p_1(y)|\le d\sqrt{\tau_--\nu}$.
+The polynomial of $x_1$ is then computed exactly (\texttt{\_\_int128}) from that of $y$ as
+$G(t\mp n)$ with $G(u^2)=\pm f_y(u)f_y(-u)$, and the usual filters are applied to $x_1$.
+All of this is in \file{enum6.c}, argument \texttt{X}, \texttt{YL} or \texttt{YU}.
+
+\paragraph{Validation.}  In degrees $6$ and $7$ the split run was compared with the plain
+sharpened run on all subtrees.  In degree $8$ it was compared on all $60$ subtrees with
+$S\le24$.  Every polynomial found by one run but not the other is either reducible, or
+irreducible and certified in exact arithmetic (\file{verify\_split.gp}): a side with
+$\tau_\pm<m$ has no square root in $\OK$, or its square root violates budget--cost.  The
+latter happens because the split run applies the extra valid test on $y$.
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+$d$ & only plain: reducible & only plain: certified & only split (all reducible)\\
+\midrule
+6 & 10 & 1 & yes\\
+7 & 27 & 2 & yes\\
+8 ($S\le24$) & 99 & 5 & 46\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Result.}  The complete degree-$8$ Case A run (all $a_1,a_2$ allowed by
+$\nu\le3+2\sqrt2$, Corollary~\ref{cor:nubound}) visits $6\,012\,361$ leaves and takes $37$ seconds on $4$ cores.  It produces
+$13\,187$ distinct polynomials, of which $82$ are irreducible.  The exact tests in
+$\Z[x_1]$ (\file{order\_filter.gp}) exclude $78$ of them: NS $7$,
+BC $1$, RG $70$.  The four remaining orders
+\[
+x^8-8x^6+16x^4-8x^2+1,\ x^8-8x^6+18x^4-12x^2+2,\ x^8-8x^6+17x^4-10x^2+1,\ x^8-8x^6+19x^4-14x^2+1
+\]
+all fail the sharpened rigidity in the maximal order (\file{fieldtest2}, RG2).
+\emph{Hence Case A of degree $8$ is empty.}
+
+\subsection{Degree 8, Case B: the shortest vector lies in a proper subfield}\label{sec:d8B}
+Everything in \S\S\ref{sec:tensor}--\ref{sec:bounds} holds for $d=8$ (tensor rank $\le7$,
+$s/\gamma_s^2\ge\frac32$), including Proposition~\ref{prop:relative},
+Lemma~\ref{lem:reldown} and Corollary~\ref{cor:relbound}.  Let $F=\Q(x_1)\subsetneq K$, so
+$[F:\Q]\in\{2,4\}$ and $\nu(K)=\nu(F)$.  The downspread conditions involve only the
+conjugates of $x_1$, so $x_1$ appears in the degree-$[F:\Q]$ enumeration.
+
+\paragraph{Square forcing} (\file{sqforce8.gp}).  If $L$ is a field with $x_1\in L\subseteq K$,
+then every window element of $L$, i.e.\ every totally positive $\alpha\in\mathcal O_L\setminus\Z$ with
+$\tau(\alpha)<\min(\frac32\nu,\nu+\frac34)$, is a square in $\OK$
+(Proposition~\ref{prop:sharp}(a)).  So a window non-square $\alpha$ of $L$ forces
+$L(\sqrt\alpha)\subseteq K$.  Iterating this up to degree $8$ gives:
 \begin{itemize}[leftmargin=*]
-\item\emph{Case B, quartic $F$.}  The enumeration in degree $4$ with the NS and BC tests leaves
-  $10$ quartic fields.  For $7$ of them the window non-squares cannot all become squares in
-  one quadratic extension, so they are impossible.  $\Q(\sqrt2,\sqrt5)$ is impossible because
-  its only shortest vector lies in $\Q(\sqrt5)$.  $\Q(\zeta_{16})^+$ forces
-  $K=\Q(\zeta_{32})^+$ and $\Q(\zeta_{24})^+$ forces $K=\Q(\zeta_{48})^+$; both fail the
-  sharpened rigidity.
-\item\emph{Case B, quadratic $F$.}  $F=\Q(\sqrt2)$ forces $\Q(\zeta_{16})^+\subset K$, and hence
-  $K=\Q(\zeta_{32})^+$.  $F=\Q(\sqrt5)$ remains: it needs an enumeration of relative quartics
-  with $\nurel\le4.21$ (Corollary~\ref{cor:relbound}, $e=4$).
-\item\emph{Case A.}  Octic polynomials with $\nu\le5.5$ (refined bound; for $\Tr x_1=0$ this
-  means $a_2\ge-20$).  With the pruning and the sharpened tests, the subtree
-  $(a_1,a_2)=(0,-12)$ takes $40$ seconds and $(0,-14)$ takes $143$ seconds ($1.15\cdot10^7$
-  leaves), but $(0,-16)$ did not finish within $25$ minutes.  Extrapolating, the full run is
-  days to weeks on $4$ cores.  In the middle range of $\nu$ the downspread conditions are not
-  yet restrictive enough to prune the tree, so degree $8$ needs a further theoretical input
-  before Case A is practical.
+\item \emph{Quartic $F$.}  The degree-$4$ enumeration with the tests valid in a subfield (NS, BC)
+  leaves $10$ fields.  For $6$ of them the order $\Z[x_1]$ does not realise $\nu(F)$, which
+  contradicts $\nu(K)=\Var(x_1)$.  For the other $4$ ($d_F=1957,2048,2304,3981$) the forced
+  octic field still has a window non-square, which is impossible.
+\item \emph{$F=\Q(\sqrt2)$.}  $2-\sqrt2$ forces $\Q(\zeta_{16})^+$.  Its window then forces
+  $\Q(\zeta_{32})^+$, which has a window non-square: impossible.
+\item \emph{$F=\Q(\sqrt5)$.}  $\nu=\frac54$ and the only window element is
+  $\varphi^2$, a square, so nothing is forced.
 \end{itemize}
+
+\paragraph{$F=\Q(\sqrt5)$} (\file{rel8.gp}).  Let $\beta\in\OK\setminus F$ realise
+$\nurel$.  Corollary~\ref{cor:relbound} with $e=4$ and $\delta_F\le1.3110$ gives
+$\nurel\le4.2142$.  Either $F(\beta)=K$ or $F'=F(\beta)$ is a quartic field.
+\begin{itemize}[leftmargin=*]
+\item \emph{$F'$ quartic.}  $\beta=(-b+\sqrt D)/2$ with $D\in\OF^+$ and $\Tr D\le8\nurel$.  With
+  the exact relative downspread test (Lemma~\ref{lem:reldown} with the actual covering
+  value $\delta(m)$ for the target in place of $\delta_F$), only two
+  fields remain: $F'$ of discriminant $725$ ($x^4-x^3-3x^2+x+1$, the totally real quartic
+  field of least discriminant) and $F'=\Q(\sqrt2,\sqrt5)$ ($d_{F'}=1600$).  In both, every window element is a square,
+  so nothing is forced.  $K/F'$ is then a relative quadratic, with $x_1\in F\subset F'$ and
+  $\nu_{K/F'}$ bounded by Corollary~\ref{cor:relbound} ($e=2$).  Here
+  $\delta_{F'}\le1.9144$ resp.\ $2.1567$ (\file{deltaF.py}, grid step $0.1$), so
+  $\nu_{K/F'}\le3.886$ resp.\ $4.21$.  Before the order-level tests we apply the exact
+  relative downspread test: no $\gamma\in\mathcal O_{F'}$ may give $\beta'+\gamma\succ0$ with
+  $\tau(\beta'+\gamma)<\nu_{K/F'}$, for $\beta'=\pm\beta$ (\texttt{enum\_e2g8}).
+\item \emph{$K=F(\beta)$.}  Relative quartics $x^4+c_1x^3+\dots+c_4$ over $\OF$, with
+  $c_1$ reduced modulo $4\OF$ and up to the conjugation $\sqrt5\mapsto-\sqrt5$, which leaves
+  $10$ residues.  $c_2$ ranges over a box given by the relative variance, and $c_3,c_4$ over
+  Rolle intervals at both real places of $F$.  The exact relative downspread test comes
+  first, then irreducibility over $F$, and then the relative order-level tests NSR, BCR and
+  RGR in $\OF[\beta]$ (\file{rel6.gp}).
+\end{itemize}
+\paragraph{Result for $F=\Q(\sqrt5)$.}
+\begin{itemize}[leftmargin=*]
+\item Relative quartics: $468\,986$ polynomials in the boxes.  The exact relative downspread
+  test removes $450\,708$ of them.  Of the irreducible ones, the relative order-level tests
+  exclude $7\,316$ (NSR $1\,577$, BCR $5\,739$), and $815$ remain.  Running time about
+  $15$--$30$ minutes per residue on one core (\file{run\_q4\_par.sh}).
+\item $K/F'$ quadratic: $F'$ of discriminant $725$ gives $23\,613$ values of $D$, with $930$
+  removed by the relative downspread test, $161$ by NSR/BCR, and $52$ left.  $F'=\Q(\sqrt2,\sqrt5)$
+  gives $20\,976$ values of $D$, with $859$ / $108$ / $97$.
+\item The $964$ order-level survivors give $390$ distinct octic fields
+  (\file{collect8.gp}; list in \file{fields\_all.txt}).  In the maximal order,
+  $386$ fail the relative sharpened rigidity over $\Q(\sqrt5)$ (RGR2), and $2$ fail the relative
+  BC test.  Two fields survive:
+  \begin{itemize}
+  \item $K_1$: $x^8-2x^7-12x^6+26x^5+17x^4-36x^3-5x^2+11x-1$, $d_{K_1}=5^4\cdot29^4$.  This is the
+    Galois closure (dihedral of order $8$) of the quartic field of discriminant $725$.
+  \item $K_2$: $x^8-3x^7-4x^6+13x^5+5x^4-13x^3-4x^2+3x+1$, $d_{K_2}=5^4\cdot29^2\cdot1249$.
+    This is a non-Galois quadratic extension of the same quartic field.
+  \end{itemize}
+  Both fail (N) (\file{condN.gp}) at an element $\alpha$ of trace $18$ in a quartic
+  subfield of discriminant $725$, with minimal polynomial $x^4-9x^3+27x^2-31x+11$.  For $K_2$
+  it is the $11$th element tested by increasing trace.  For $K_1$ the search by increasing
+  trace finds it as the $21$st element.  Six earlier elements of trace $18$ exhaust the
+  $2$\,GB stack and are left undecided, which does not matter for the conclusion
+  (\file{witness\_k1\_d8.gp}).
+\end{itemize}
+Together with Case A (\S\ref{sec:d8A}) this proves Theorem~\ref{thm:eight}.  The
+floating-point caveats of \S\ref{sec:status} apply, now including $\delta_{F'}$ for the two
+quartic fields $F'$ (grid step $0.1$).
 
 \section{Consistency checks and status}\label{sec:status}
 
@@ -661,14 +786,14 @@ Everything above holds for $d=8$: tensor rank $\le7$ gives $s/\gamma_s^2\ge\frac
   $\delta_F$ for the four fields.
 \end{itemize}
 
-\begin{remark}[degree $8$ and beyond]
-Lemma~\ref{lem:tensor} gives $s/\gamma_s^2\ge\frac32$ also for $s=7,8$ ($\gamma_7^7=64$,
-$\gamma_8=2$).  So budget--cost, rigidity and Corollary~\ref{cor:nubound} hold for $d\le9$,
-and $d=8$ has $\nu(K)\le3+2\sqrt2=5.83$.  Two things are new in degree $8$.  Case B must
-handle quadratic subfields with relative degree $4$ and quartic subfields with relative
-degree $2$.  And the Case A enumeration is much larger: the leaf count grows by roughly
-$2.5$--$3$ per unit of $a_2$, and the range of $a_2$ grows with the bound on $\nu$.  The
-in-enumerator tests of \S\ref{sec:deg7} are what keeps the output manageable.
+\begin{remark}[degree $9$ and beyond]
+Lemma~\ref{lem:tensor} gives $s/\gamma_s^2\ge\frac32$ for $s\le8$ ($\gamma_7^7=64$,
+$\gamma_8=2$).  So budget--cost, rigidity, the square dichotomy and
+Corollary~\ref{cor:nubound} hold for $d\le9$, and a sextic, septic or octic tensor rank never
+exceeds $8$.  In degree $9$, $\nu(K)\le(13+\sqrt{153})/4\approx6.34$.  Case B there has cubic
+subfields with relative degree $3$ (where window elements of $F$ must already be squares in
+$F$).  For Case A the rung split of \S\ref{sec:d8A} carries over unchanged.  From degree $10$
+on, the tensor floor must be re-examined ($\gamma_9$, $\gamma_{10}$).
 \end{remark}
 
 \begin{thebibliography}{KY2}
