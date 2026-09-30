@@ -1,0 +1,1 @@
+a1=-1 a2=-1 S=2.8571 leaves=2 F1=0 F2=0 F3=0 NS=2 RIG=0 out=0 pruned=0

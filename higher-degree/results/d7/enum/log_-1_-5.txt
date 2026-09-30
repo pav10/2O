@@ -1,0 +1,1 @@
+a1=-1 a2=-5 S=10.8571 leaves=205 F1=3 F2=0 F3=2 NS=78 RIG=94 out=28 pruned=14

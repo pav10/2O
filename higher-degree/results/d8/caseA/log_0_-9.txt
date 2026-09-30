@@ -1,0 +1,3 @@
+a1=0 a2=-9 S=18.0000 mode=X leaves=28030 F1=2996 F2=2964 F3=0 NS=162 RIG=21898 rung=0 out=10 pruned=4599
+a1=0 a2=-9 S=18.0000 mode=YL leaves=0 F1=0 F2=0 F3=0 NS=0 RIG=0 ybud=0 rung=0 out=0 pruned=0
+a1=0 a2=-9 S=18.0000 mode=YU leaves=0 F1=0 F2=0 F3=0 NS=0 RIG=0 ybud=0 rung=0 out=0 pruned=0

@@ -1,0 +1,5 @@
+# verify_strong.gp on the degree-7 'why' output, 4 parts: [checked irreducible, reducible skipped, disagreements]
+[214159, 191214, 0]
+[214483, 190891, 0]
+[214441, 190948, 0]
+[214020, 191380, 0]

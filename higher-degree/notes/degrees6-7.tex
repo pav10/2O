@@ -1,0 +1,867 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\rk}{rk}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\OF}{\mathcal{O}_F}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\LamK}{\Lambda_K}
+\newcommand{\nurel}{\nu_{K/F}}
+\newcommand{\file}[1]{\texttt{#1}}
+
+\title{The lifting problem for universal quadratic forms in degrees six and seven}
+\date{Draft notes, September 2026. Code and data: \file{higher-degree/} in \url{https://github.com/pav10/2O}}
+
+\begin{document}
+
+\begin{abstract}
+We show that no totally real number field of degree $6$ or $7$ admits a universal quadratic
+form with rational integer coefficients (a universal $\Z$-form).  Together with the
+classification in degrees $\le 5$ by Kala and Yatsyna, the fields of degree at most $7$ with a
+universal $\Z$-form are exactly $\Q$, $\Q(\sqrt5)$ and $\Q(\zeta_7+\zeta_7^{-1})$.
+The proof replaces the house bound of the degree-$\le 5$ argument by the geometry of the
+\emph{variance lattice} $\LamK=\OK/\Z$: a tensor-product minimum bound turns the existence of a
+universal $\Z$-form into lower bounds for traces of totally positive integers, and a
+``downspread'' argument bounds the shortest vector of $\LamK$ by $(5+\sqrt{21})/2$.
+This makes the search space small: in the case where the shortest vector generates $K$,
+no number field has to be computed at all (every candidate dies inside the order $\Z[x_1]$);
+in the imprimitive case only $18$ fields are ever built, and the last five are excluded by
+explicit elements.  A second, independent route through the Mordell--Ko theorem and the
+$E_6$ trace threshold confirms every final certificate.  In degree $7$ (no proper subfields,
+$\nu(K)\le(11+\sqrt{105})/4$) all $5.3\cdot10^8$ candidate polynomials are excluded inside
+$\Z[x_1]$, again without computing a single number field.
+\end{abstract}
+
+\maketitle
+
+\section{Statement and overview}\label{sec:intro}
+
+Let $K$ be a totally real number field of degree $d$ with ring of integers $\OK$.  A
+\emph{$\Z$-form} is a positive definite quadratic form $Q(x)=\sum_{i\le j}a_{ij}x_ix_j$ with
+$a_{ij}\in\Z$; it is \emph{universal over $K$} if it represents every totally positive element
+of $\OK$ over $\OK$.  Kala and Yatsyna \cite{KY-EB} proved that for $d\le5$ such a form exists
+only for $K=\Q,\Q(\sqrt5),\Q(\zeta_7+\zeta_7^{-1})$.  Their proof uses the Mordell--Ko
+theorem \cite{Ko}: in rank $\le5$ every positive definite classical integral form is a sum of
+squares of integral linear forms.  This fails in rank $6$ (the lattice $E_6$), which is why
+degree $6$ was the first open case.
+
+\begin{theorem}\label{thm:main}
+No totally real number field of degree $6$ admits a universal $\Z$-form.
+\end{theorem}
+
+\begin{theorem}\label{thm:seven}
+No totally real number field of degree $7$ admits a universal $\Z$-form.
+\end{theorem}
+
+\begin{theorem}\label{thm:eight}
+No totally real number field of degree $8$ admits a universal $\Z$-form.
+\end{theorem}
+
+\begin{corollary}\label{cor:le6}
+A totally real field of degree $d\le 8$ admits a universal $\Z$-form if and only if it is
+$\Q$, $\Q(\sqrt5)$ or $\Q(\zeta_7+\zeta_7^{-1})$.
+\end{corollary}
+
+The proof has a theoretical part (\S\S\ref{sec:setup}--\ref{sec:e6}), which reduces the
+theorem to a finite computation with explicit bounds, and a computational part
+(\S\ref{sec:computation} for degree $6$, \S\ref{sec:deg7} for degree $7$,
+\S\S\ref{sec:d8A}--\ref{sec:d8B} for degree $8$, which uses the sharpenings of \S\ref{sec:sharp}).  The main
+steps are:
+\begin{enumerate}[label=(\roman*)]
+\item The necessary condition~(N) of \cite{KY1}: every totally positive $\alpha$ is
+  $\alpha=\sum M_{ij}\omega_i\omega_j$ for a positive semidefinite half-integral $M$.
+\item A tensor-product bound (Lemma~\ref{lem:tensor}) turns (N) into a \emph{budget--cost}
+  inequality $\tau(\alpha)\ge\nu(K)$ (Proposition~\ref{prop:budget}) and into a
+  \emph{rigidity} statement for elements with $\tau(\alpha)<\frac32\nu(K)$
+  (Proposition~\ref{prop:rigidity}), plus relative versions over subfields.
+\item Applying budget--cost to $x_1-n$ and $-x_1-n'$, for $x_1$ a shortest vector of the variance
+  lattice, gives $\nu(K)\le(5+\sqrt{21})/2$ (Corollary~\ref{cor:nubound}).  Over a proper
+  subfield, the same argument together with a ``positive covering constant'' $\delta_F$ bounds
+  the relative minimum (Corollary~\ref{cor:relbound}).
+\item The resulting finite enumerations are run in \S\ref{sec:computation}.  Every candidate
+  field is excluded, and every exclusion is witnessed by an explicit element.
+\end{enumerate}
+
+\section{Setup}\label{sec:setup}
+
+Throughout, $K$ is totally real of degree $d$ with embeddings $\sigma_1,\dots,\sigma_d$.
+For $x\in K$ put
+\[
+\tau(x)=\tfrac1d\Tr_{K/\Q}(x),\qquad
+\Var(x)=\tfrac1d\sum_{j=1}^d\bigl(\sigma_j(x)-\tau(x)\bigr)^2 .
+\]
+Both are intrinsic: if $x$ lies in a subfield $F$, they coincide with the quantities computed
+in $F$.  The \emph{variance lattice} is $\LamK=\OK/\Z$ with the positive definite quadratic
+form $d\Var$; it is a lattice of rank $d-1$ (the embedding $x\mapsto(\sigma_j(x)-\tau(x))_j$
+identifies it with a lattice in $\mathbf 1^\perp\subset\R^d$).  Put
+\[
+\nu(K)=\min\{\Var(x):x\in\OK\setminus\Z\},\qquad
+t(K)=\inf\{\tau(\alpha):\alpha\in\OK^+\setminus\Z\}.
+\]
+A \emph{shortest vector} is an $x_1\in\OK\setminus\Z$ with $\Var(x_1)=\nu(K)$; it is determined
+by its class up to $x_1\mapsto\pm x_1+k$ ($k\in\Z$).
+
+For a subfield $F\subseteq K$ with $f=[F:\Q]$ and $e=[K:F]$, group the embeddings of $K$ into
+$f$ blocks $B_1,\dots,B_f$ of size $e$ (the fibres over the embeddings $\rho_1,\dots,\rho_f$
+of $F$), and define the block means $\mu_k(x)=\frac1e\sum_{j\in B_k}\sigma_j(x)$ and
+\[
+\Var_{K/F}(x)=\tfrac1d\sum_{k=1}^f\sum_{j\in B_k}\bigl(\sigma_j(x)-\mu_k(x)\bigr)^2,
+\qquad \nurel=\min\{\Var_{K/F}(x):x\in\OK\setminus F\}.
+\]
+The map $x\mapsto(\sigma_j(x)-\mu_k(x))_{j\in B_k,\,k}$ has kernel $F$, and $\OK/\OF$ is
+torsion free, so $\Var_{K/F}$ is a positive definite form on the lattice $\OK/\OF$ of rank
+$d-f$.
+
+\section{Condition (N) and the tensor bound}\label{sec:tensor}
+
+\begin{lemma}[{\cite[Prop.~3.1]{KY1}}]\label{lem:N}
+Let $\omega_1,\dots,\omega_d$ be a $\Z$-basis of $\OK$.  If $K$ admits a universal $\Z$-form,
+then every $\alpha\in\OK^+$ satisfies
+\[
+\text{(N)}\qquad \alpha=\sum_{i,j}M_{ij}\,\omega_i\omega_j\quad\text{for some positive
+semidefinite } M=M^t\text{ with } M_{ii}\in\Z,\ 2M_{ij}\in\Z .
+\]
+\end{lemma}
+
+\begin{proof}
+If $Q$ has Gram matrix $M_Q$ and $\alpha=Q(v)$ with $v\in\OK^r$, write $v=V\omega$ with
+$V\in\Z^{r\times d}$ and take $M=V^tM_QV$.
+\end{proof}
+
+Equivalently, $2\alpha=Q_{L}(v)$ where $L=(\Z^d,2M)$ is an \emph{even} lattice.  Replacing
+$L$ by its quotient by the radical, we may take $L$ positive definite of rank $\le d$; then
+$\min L\ge2$, and every vector of $L$ that is not a minimal vector has norm $\ge4$.
+
+\begin{lemma}[tensor floor]\label{lem:tensor}
+Let $L,M$ be positive definite lattices (real quadratic forms on free $\Z$-modules), and let
+$w\in L\otimes M$, $w\ne0$, have tensor rank $s$.  Then
+$Q(w)\ge\frac{s}{\gamma_s^2}\min L\cdot\min M$, where $\gamma_s$ is Hermite's constant.
+In particular, for $s\le 6$,
+\[
+Q(w)\ \ge\ \min L\cdot\min M,\qquad\text{and}\qquad Q(w)\ge\tfrac32\min L\cdot\min M\ \text{ if } s\ge2 .
+\]
+\end{lemma}
+
+\begin{proof}
+By the Smith normal form, the coefficient matrix of $w$ is $\sum_{i=1}^s x_iy_i^t$ with
+$x_1,\dots,x_s\in L$ and $y_1,\dots,y_s\in M$ linearly independent.  With the Gram
+matrices $X$ of the $x_i$ and $Y$ of the $y_i$ we have $Q(w)=\operatorname{tr}(XY)
+=\operatorname{tr}(X^{1/2}YX^{1/2})\ge s(\det X\det Y)^{1/s}$ by the arithmetic--geometric
+mean inequality, and $\det X\ge(\min L/\gamma_s)^s$, $\det Y\ge(\min M/\gamma_s)^s$ by
+Hermite's inequality for the lattices spanned by the $x_i$ and the $y_i$.  The known values
+$\gamma_1^2=1$, $\gamma_2^2=\frac43$, $\gamma_3^2=2^{2/3}$, $\gamma_4^2=2$,
+$\gamma_5^2=8^{2/5}$, $\gamma_6^2=(64/3)^{1/3}$ (see \cite{CS}) give
+$s/\gamma_s^2=1,\ 1.5,\ 1.889,\ 2,\ 2.176,\ 2.163$ for $s=1,\dots,6$.
+\end{proof}
+
+This is the elementary case of Kitaoka's theorem on minima of tensor products \cite{Ki}; we
+only need tensor rank $\le6$, because $\rk\LamK=d-1\le5$ when $d\le 6$.
+
+\begin{proposition}[budget--cost]\label{prop:budget}
+Let $d\le7$ and suppose $K$ admits a universal $\Z$-form.  Then $\tau(\alpha)\ge\nu(K)$ for
+every $\alpha\in\OK^+\setminus\Z$; that is, $t(K)\ge\nu(K)$.
+\end{proposition}
+
+\begin{proof}
+Write $2\alpha=Q_L(v)$ with $v\in L\otimes\OK$ as above, and let $m=\frac1d\sum_j\sigma_j(v)\in
+L\otimes\R$.  Averaging $Q_L(\sigma_jv)=Q_L(m)+2B(m,\sigma_jv-m)+Q_L(\sigma_jv-m)$ over $j$,
+\begin{equation}\label{eq:decomp}
+2\tau(\alpha)=Q_L(m)+\tfrac1d\,Q_{L\otimes\LamK}(\bar v),
+\end{equation}
+where $\bar v$ is the image of $v$ in $L\otimes\LamK$ and $\LamK$ carries the form $d\Var$.
+Since $\alpha\notin\Z$ we have $v\notin L\otimes\Z$, so $\bar v\ne0$ ($\Z$ is saturated in
+$\OK$), and Lemma~\ref{lem:tensor} gives $Q_{L\otimes\LamK}(\bar v)\ge 2\cdot d\nu(K)$.
+\end{proof}
+
+\begin{proposition}[rigidity]\label{prop:rigidity}
+Under the hypotheses of Proposition~\ref{prop:budget}, let $\alpha\in\OK^+\setminus\Z$ with
+$\tau(\alpha)<\frac32\nu(K)$.  Then $\alpha=y^2+cy+b$ with $y\in\OK\setminus\Z$, $b,c\in\Z$ and
+$\nu(K)\le\Var(y)\le\tau(\alpha)$.
+\end{proposition}
+
+\begin{proof}
+In \eqref{eq:decomp}, $\frac1dQ(\bar v)<3\nu(K)$.  By Lemma~\ref{lem:tensor}, $\bar v$ has
+tensor rank $1$, i.e.\ $\bar v=e\otimes\bar y$, and $Q_L(e)=2$ (otherwise $Q_L(e)\ge4$ and the
+cost is $\ge4\nu$).  Lifting, $v=e\otimes y+r$ with $r\in L$, so
+$2\alpha=2y^2+2B(e,r)y+Q_L(r)$ with $Q_L(r)\in2\Z$.  Finally $2\tau(\alpha)\ge\frac1dQ(\bar v)=
+2\Var(y)$.
+\end{proof}
+
+\begin{proposition}[relative versions]\label{prop:relative}
+Suppose $K$ ($d\le 6$) admits a universal $\Z$-form, and let $F\subsetneq K$ be a subfield.
+Then $\tau(\alpha)\ge\nurel$ for every $\alpha\in\OK^+\setminus F$.  If moreover
+$\tau(\alpha)<\frac32\nurel$, then $\alpha=y^2+\gamma y+\beta$ with $y\in\OK\setminus F$,
+$\beta,\gamma\in\OF$ and $\Var_{K/F}(y)\le\tau(\alpha)$.
+\end{proposition}
+
+\begin{proof}
+Decompose $\R^d$ orthogonally into block-constant vectors and their complement.  The part
+of $\frac1dQ(\bar v)$ in the complement is $\frac1dQ(\pi\bar v)$, where $\pi\bar v\in
+L\otimes\pi(\LamK)$ and $\pi(\LamK)\cong\OK/\OF$ carries the form $d\Var_{K/F}$ of minimum
+$d\nurel$.  If $\alpha\notin F$ then $v\notin L\otimes\OF$, so $\pi\bar v\neq0$; apply
+Lemma~\ref{lem:tensor} as before.  For rigidity, $\pi\bar v=e\otimes\pi(\bar y)$ with
+$Q_L(e)=2$.  Because $\ker\pi$ on $L\otimes\LamK$ is $L\otimes\Lambda_F$, this gives
+$v-e\otimes y\in L\otimes\OF$; expand as before, using that $L$ is even.
+\end{proof}
+
+\section{Bounding the minima}\label{sec:bounds}
+
+\begin{lemma}[downspread]\label{lem:downspread}
+Let $x\in\OK\setminus\Z$ with conjugates $\theta_1<\dots<\theta_d$.  Then
+$\alpha_-=x-(\lceil\theta_1\rceil-1)$ and $\alpha_+=-x+(\lfloor\theta_d\rfloor+1)$ are totally
+positive and non-rational, and
+$\tau(\alpha_-)=\tau(x)-\lceil\theta_1\rceil+1<\tau(x)-\theta_1+1$,
+$\tau(\alpha_+)=\lfloor\theta_d\rfloor+1-\tau(x)<\theta_d-\tau(x)+1$.
+\end{lemma}
+
+\begin{corollary}\label{cor:nubound}
+If $K$ of degree $d\le7$ admits a universal $\Z$-form, then $d\,\nu\ge2(\nu-1)^2$ for
+$\nu=\nu(K)$.  In particular $\nu(K)\le\frac{(d+4)+\sqrt{(d+4)^2-16}}{4}$, which for $d=6$
+is $(5+\sqrt{21})/2=4.7913\ldots$.
+\end{corollary}
+
+\begin{proof}
+Let $x_1$ be a shortest vector and $w_j=\sigma_j(x_1)-\tau(x_1)$.  By
+Proposition~\ref{prop:budget} and Lemma~\ref{lem:downspread}, $-\min_jw_j>\nu-1$ and
+$\max_jw_j>\nu-1$.  Hence $d\nu=\sum w_j^2\ge2(\nu-1)^2$.
+\end{proof}
+
+The enumeration of \S\ref{sec:computation} uses the exact forms of these inequalities (with
+the integer parts), together with the following consequence of budget--cost for quadratic
+polynomials in $x_1$.
+
+\begin{lemma}\label{lem:quadfilter}
+Let $x_1$ be a shortest vector of degree $\ge3$ and $P\in\Z[t]$ monic of degree $2$ with
+$P(\sigma_j(x_1))>0$ for all $j$.  Under the hypotheses of Proposition~\ref{prop:budget},
+$P(\tau(x_1))\ge0$.
+\end{lemma}
+
+\begin{proof}
+$P(x_1)$ is totally positive and not rational, and $\tau(P(x_1))=\Var(x_1)+P(\tau(x_1))$.
+\end{proof}
+
+\begin{definition}
+For a totally real field $F$ of degree $f$ with Minkowski lattice $\sigma(\OF)\subset\R^f$,
+the \emph{positive covering constant} is
+\[
+\delta_F=\sup_{u\in\R^f}\ \min\Bigl\{\tfrac1f\textstyle\sum_k(p_k-u_k):\ p\in\sigma(\OF),\
+p_k>u_k\ \text{for all }k\Bigr\}.
+\]
+\end{definition}
+
+For example $\delta_\Q=1$.  The function $h(u)=\min_{p>u}\sum_k(p_k-u_k)$ is
+$\sigma(\OF)$-periodic and satisfies $h(u)\le h(u')+\sum_k(u'_k-u_k)$ whenever $u\le u'$
+coordinatewise.  Evaluating $h$ on a grid of step $\varepsilon$ that covers a fundamental
+parallelepiped therefore gives the rigorous bound $\delta_F\le\max_{\mathrm{grid}}h/f+\varepsilon$
+(\file{deltaF.py}).
+
+\begin{lemma}[relative downspread]\label{lem:reldown}
+For $y\in\OK\setminus F$ with block minima $m_k=\min_{j\in B_k}\sigma_j(y)$, there is
+$\gamma\in\OF$ with $y+\gamma$ totally positive and
+$\tau(y+\gamma)\le\frac1f\sum_k(\mu_k(y)-m_k)+\delta_F$.  The same holds for $-y$ with the
+block maxima.
+\end{lemma}
+
+\begin{proof}
+$\tau(y+\gamma)=\frac1f\sum_k(\mu_k(y)-m_k)+\frac1f\sum_k(\rho_k(\gamma)+m_k)$, and the second
+sum can be made $\le f\delta_F$ with all $\rho_k(\gamma)+m_k>0$.
+\end{proof}
+
+\begin{corollary}\label{cor:relbound}
+If $K$ ($d\le6$) admits a universal $\Z$-form and $F\subsetneq K$ with $e=[K:F]$, then
+$e\,\nurel\ge2(\nurel-\delta_F)^2$.
+\end{corollary}
+
+\begin{proof}
+Let $y$ realise $\nurel$, and write $u_k$ for the vector of within-block deviations in block
+$k$, with maximum $M_k$ and minimum $-m'_k$.  By Proposition~\ref{prop:relative} and
+Lemma~\ref{lem:reldown}, $D_\pm\ge\nurel-\delta_F$, where $D_+=\frac1f\sum M_k$ and
+$D_-=\frac1f\sum m'_k$.  Since $\|u_k\|^2\ge M_k^2+m_k'^2\ge(M_k+m'_k)^2/2$,
+$d\nurel=\sum_k\|u_k\|^2\ge\frac1{2f}\bigl(\sum_k(M_k+m'_k)\bigr)^2\ge2f(\nurel-\delta_F)^2$.
+\end{proof}
+
+For $F=\Q$ this is Corollary~\ref{cor:nubound} (with $\delta_\Q=1$, $e=d$).
+
+\section{Rigidity via square roots, and the \texorpdfstring{$E_6$}{E6} threshold}\label{sec:e6}
+
+For testing, rigidity is used in the following form, which needs no search in $\OK$.
+
+\begin{lemma}\label{lem:sqshape}
+Let $\alpha$ be as in Proposition~\ref{prop:rigidity} and suppose $\Q(\alpha)=K$.  Then there
+is $\kappa\in\Z$ with $\kappa\equiv0,3\pmod4$ such that $4\alpha-\kappa=z^2$ with $z\in\OK$,
+$4\nu(K)\le\Var(z)\le4\tau(\alpha)$ and
+$0<4\min_j\sigma_j(\alpha)-\kappa\le\max\bigl(\frac{d^2}{d-1}\tau(\alpha),\,\Var(\alpha)/\nu(K)\bigr)$
+(for $d=6$: $\frac{36}5\tau(\alpha)=7.2\,\tau(\alpha)$).
+Equivalently, the polynomial $4^d m_\alpha((t^2+\kappa)/4)\in\Z[t]$ has an irreducible factor
+of degree $d$ whose roots have variance in $[4\nu(K),4\tau(\alpha)]$.
+\end{lemma}
+
+\begin{proof}
+Take $z=2y+c$ and $\kappa=4b-c^2$.  Put $u=4\min\sigma(\alpha)-\kappa$, so that
+$|\sigma_j(z)|\ge\sqrt u$.  If $p\ge1$ conjugates of $z$ are positive and $q\ge1$ negative, then
+$\Var(z)\ge\frac{pq}{d^2}(2\sqrt u)^2\ge\frac{d-1}{d^2}\,4u$, so $u\le\frac{d^2}{d-1}\tau(\alpha)$.  If they all agree,
+$\Var(z)=\Var(\sqrt{4\alpha-\kappa})\le4\Var(\alpha)/u$, and $\Var(z)\ge4\nu$ gives
+$u\le\Var(\alpha)/\nu$.
+\end{proof}
+
+The second tool is used as an independent cross-check of the final certificates.  It is the
+place where $E_6$ enters.
+
+\begin{proposition}[$E_6$ threshold]\label{prop:e6}
+Let $d=6$ and $\alpha\in\OK^+$ with $\Tr\alpha<3(3d_K)^{1/6}$.  Then (N) holds for $\alpha$ if
+and only if
+\[
+\text{(SoS$_2$)}\qquad 2\alpha=\sum_k x_k^2\ \text{ with } x_k\in\OK\ \text{ and }\ \sum_kx_k\in2\OK .
+\]
+\end{proposition}
+
+\begin{proof}
+If (SoS$_2$) holds, write $x=U\omega$ and take $M=\frac12U^tU$: its diagonal is integral
+because $\sum_kU_{ki}^2\equiv\sum_kU_{ki}\pmod 2$.  Conversely, let $2\alpha=Q_L(v)$ with $L$
+even of rank $r\le6$, and write $v=\sum_kf_k\otimes\omega_k$ with $f_k\in L$.  If
+$f_1,\dots,f_6$ are linearly dependent, then $2\alpha$ is represented by an even lattice of
+rank $\le5$; by Mordell--Ko \cite{Ko,Mo} its Gram matrix is $U^tU$ with $U$ integral, which
+gives (SoS$_2$).  Otherwise $G=(B(f_k,f_l))$ is the Gram matrix of an even positive definite
+lattice of rank $6$.  Such a lattice has determinant $\ge3$: even unimodular positive
+lattices have rank $\equiv0\pmod8$ \cite[Ch.~V]{Se}, and an even lattice of rank $6$ and
+determinant $2$ has discriminant form $q\equiv\frac12$ or $\frac32\pmod 2$; gluing it with
+$E_7$ (discriminant form $\frac32$), respectively with $A_1$ (discriminant form $\frac12$),
+would produce an even unimodular lattice of rank $13$, respectively $7$.  Hence
+$2\Tr\alpha=\operatorname{tr}(GT)\ge6(\det G\det T)^{1/6}\ge6(3d_K)^{1/6}$, where $T$ is the
+trace form of the basis ($\det T=d_K$).
+\end{proof}
+
+The extremal case of the determinant bound is $E_6$ (determinant $3$).  It is the only obstruction to the degree-$\le5$ method in degree $6$, but
+it lives above trace $3(3d_K)^{1/6}\ge29.47$.  Every certificate below has trace $\le14$.
+
+\section{The computation}\label{sec:computation}
+
+All code is in \file{higher-degree/src}.  \file{run\_degree6.sh} reproduces everything in
+about 10 minutes on 4 cores; \file{run\_sanity.sh} runs the same machinery in degrees $2$--$5$ (gcc, PARI/GP 2.15, python3 with numpy).  Floating point is used
+only to \emph{locate} candidates, always with margins in the direction that keeps more
+candidates.  Every exclusion is decided in exact arithmetic.
+
+Let $K$ be a sextic field with a universal $\Z$-form and $x_1$ a shortest vector.  Either
+$\Q(x_1)=K$ (Case A) or $F=\Q(x_1)$ is a quadratic or cubic subfield (Case B).
+
+\subsection{Case A: the shortest vector generates \texorpdfstring{$K$}{K}}\label{sec:caseA}
+Normalise $x_1\mapsto\pm x_1+k$ so that $\Tr x_1\in\{0,1,2,3\}$.  By
+Corollary~\ref{cor:nubound}, the minimal polynomial $x^6+a_1x^5+\dots+a_6$ of $x_1$ satisfies
+$a_1\in\{0,-1,-2,-3\}$ and $\sum_j(\sigma_jx_1-\tau x_1)^2\le 15+3\sqrt{21}$.
+\file{enum6.c} enumerates all real-rooted integral polynomials with these constraints.  It
+uses Robinson's method: by Rolle's theorem each coefficient is confined to an interval
+determined by the roots of the previous derivative \cite{Ro,MS}.  The program keeps only
+those whose roots pass the exact downspread inequalities of Lemma~\ref{lem:downspread} (with
+$\nu=\Var(x_1)$) and Lemma~\ref{lem:quadfilter}.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+real-rooted polynomials enumerated (leaves)& 2\,088\,667\\
+passing downspread and quadratic filters & 40\,764\\
+irreducible & 15\,720\\
+\midrule
+NS: a shorter non-rational element exists in $\Z[x_1]$ & 873\\
+BC: some $\alpha\in\Z[x_1]^+\setminus\Z$ has $\tau(\alpha)<\Var(x_1)$ & 5\,062\\
+RG: some $\alpha\in\Z[x_1]^+$ in the rigidity window fails Lemma~\ref{lem:sqshape} & 9\,785\\
+\textbf{survivors} & \textbf{0}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each of the three order-level tests is a necessary condition \emph{for $x_1$ to be a shortest
+vector of $\LamK$} for a field with a universal $\Z$-form.  They are stated in the order
+$\Z[x_1]\subseteq\OK$, so no maximal order is ever computed in Case A.  The list of the
+15\,720 polynomials with the reason for each exclusion is \file{results/prim\_status.txt}.
+
+\subsection{Case B: the shortest vector lies in a proper subfield}\label{sec:caseB}
+Now $\nu(K)=\nu(F)$, and every element of $F$ is an element of $K$ with the same $\tau$ and
+$\Var$.  The same enumeration in degrees $2$ and $3$ (in degree $2$ without
+Lemma~\ref{lem:quadfilter}, which needs $\deg x_1\ge3$), using only the NS and BC tests (not
+rigidity, since the $y$ of Proposition~\ref{prop:rigidity} may lie outside $F$), leaves
+exactly
+\[
+F\in\{\Q(\sqrt5),\ \Q(\sqrt2),\ \Q(\zeta_7)^+,\ \Q(\zeta_9)^+\},
+\qquad \nu(F)=\tfrac54,\ 2,\ \tfrac{14}9,\ 2 .
+\]
+For each $F$ let $y$ be a relative shortest vector, so $K=F(y)$ since $[K:F]\in\{2,3\}$ is
+prime.  Corollary~\ref{cor:relbound} and the certified bounds for $\delta_F$ give:
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+$F$ & $e$ & $\delta_F\le$ & $\nurel\le$ & candidates & order-level survivors\\
+\midrule
+$\Q(\sqrt5)$ & 3 & 1.3110 & 3.6513 & 2504 relative cubics & 20\\
+$\Q(\sqrt2)$ & 3 & 1.7091 & 4.2272 & 3873 relative cubics & 34\\
+$\Q(\zeta_7)^+$ & 2 & 1.5513 & 3.3934 & 1582 values of $\Delta$ & 1\\
+$\Q(\zeta_9)^+$ & 2 & 2.1529 & 4.2030 & 2242 values of $\Delta$ & 7\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Here a relative cubic is $y^3+b_1y^2+b_2y+b_3$ over $\OF$, with $b_1$ modulo $3\OF$ and
+$\frac16\Tr_F(\frac23b_1^2-2b_2)=\Var_{K/F}(y)$.  A relative quadratic is
+$y=(-b_1+\sqrt\Delta)/2$ with $\Delta\in\OF^+$, $b_1$ modulo $2\OF$, $\Delta\equiv b_1^2\pmod4$ and
+$\Var_{K/F}(y)=\Tr_F(\Delta)/12$.  The order-level tests in $\OF[y]$ are the absolute ones
+(with $\nu(K)=\nu(F)$) together with the relative budget--cost and ``$y$ is relatively
+shortest''.  The $62$ survivors give $18$ distinct fields.  Only these $18$ fields are built
+in the whole proof.  On $\OK$, $12$ of them fail relative rigidity
+(Proposition~\ref{prop:relative}) and one fails absolute rigidity.  The remaining five fail
+(N) at an explicit element:
+
+\begin{center}
+\begin{tabular}{llccl}
+\toprule
+$K$ & $d_K$ & $\Tr\alpha$ & $N\alpha$ & minimal polynomial of the witness $\alpha$\\
+\midrule
+$\Q(\sqrt5,\zeta_7^+)$ & 300125 & 14 & 29 & $x^6-14x^5+73x^4-182x^3+227x^2-133x+29$\\
+$\Q(\sqrt2,\zeta_7^+)$ & 1229312 & 12 & 8 & $x^2-4x+2$ \quad($\alpha=2-\sqrt2$)\\
+$\Q(\sqrt2,\zeta_9^+)$ & 3359232 & 12 & 8 & $x^2-4x+2$ \quad($\alpha=2-\sqrt2$)\\
+$x^6-9x^4+24x^2-17$ & 7138368 & 12 & 9 & $x^3-6x^2+9x-3$ \quad($\alpha=2-\zeta_9-\zeta_9^{-1}$)\\
+$x^6-9x^4+24x^2-19$ & 7978176 & 12 & 9 & $x^3-6x^2+9x-3$ \quad($\alpha=2-\zeta_9-\zeta_9^{-1}$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each failure of (N) is established by the exhaustive search of \file{condN.gp}.  It uses
+$\operatorname{tr}M\le\Tr\alpha/\lambda_{\min}(T)$, the bound
+$M_{ii}\le(\sum_j|\sigma_j(\omega_i^*)|\sqrt{\sigma_j\alpha})^2$ with $\omega^*$ the
+trace-dual basis, integral solution of the linear system for the off-diagonal entries, a
+Fincke--Pohst enumeration of the solution coset, and an exact positive-semidefiniteness
+test.  The witnesses are checked a second time by Proposition~\ref{prop:e6}, with a
+different search (\file{sos2.gp}).  In the last two fields there is no $x\ne0$ with
+$x^2\preceq2\alpha$ at all, and in $\Q(\sqrt5,\zeta_7^+)$ the only such $x$ are $\pm1$.
+The first witness coincides with the one found earlier by independent code in the working
+pack \cite{Pack}.
+
+\subsection{Proof of Theorem~\ref{thm:main}}
+Suppose $K$ is sextic with a universal $\Z$-form and let $x_1$ be a shortest vector.  In
+Case A, the minimal polynomial of a suitable normalisation of $x_1$ is among the
+$15\,720$ polynomials of \S\ref{sec:caseA}, and each of them violates a condition that a
+shortest vector must satisfy.  In Case B, $F=\Q(x_1)$ is one of the four fields listed, and
+$K=F(y)$ for a relative shortest vector $y$ within the enumerated range.  The resulting field
+is one of the $18$ fields of \S\ref{sec:caseB}, each of which violates rigidity or (N).
+\qed
+
+\section{Degree seven}\label{sec:deg7}
+
+Let $K$ be a septic field with a universal $\Z$-form.  Budget--cost, rigidity and
+Corollary~\ref{cor:nubound} hold for $d=7$: the tensor rank is at most $\rk\LamK=6$, and
+$s/\gamma_s^2\ge\frac32$ for $2\le s\le6$.  Thus $\nu(K)\le(11+\sqrt{105})/4=5.3117\ldots$.
+Since $7$ is prime, $K$ has no proper subfields.  So the shortest vector $x_1$ generates $K$
+(only Case A occurs), and every non-rational element of $K$ generates $K$.  In particular
+Lemma~\ref{lem:sqshape} applies to every totally positive non-rational $\alpha$ in the rigidity
+window.
+
+The enumeration of \S\ref{sec:caseA} (with $\Tr x_1\in\{0,1,2,3\}$ and centred
+$T_2\le7(11+\sqrt{105})/4$) produces $5.3\cdot10^8$ leaves.  So we also run two of the
+order-level tests inside the enumerator (\file{enum6.c}, mode \texttt{strong}):
+\begin{itemize}[leftmargin=*]
+\item[(NS)] for $y=cx_1^2+bx_1$ ($1\le c\le3$) and $y=x_1^3+ax_1^2+bx_1$, with the integers
+  $a,b$ near the real minimiser of $\Var(y)$: if $0<\Var(y)<\Var(x_1)$, then $x_1$ is not a
+  shortest vector;
+\item[(RIG)] Lemma~\ref{lem:sqshape} for the two downspread elements $\alpha_\pm$ of
+  Lemma~\ref{lem:downspread}, whenever $\tau(\alpha_\pm)<\frac32\Var(x_1)$.  As $K=\Q(\alpha)$,
+  the conjugates of $z$ are $\pm\sqrt{4\sigma_j(\alpha)-\kappa}$.  So $z\in\OK$ exists iff, for
+  some $\kappa$ in the range of the lemma and some choice of signs, all elementary symmetric
+  functions of these numbers are integers, and $\Var(z)\in[4\Var(x_1),4\tau(\alpha)]$.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+real-rooted polynomials enumerated (leaves) & 533\,562\,406\\
+excluded by the downspread inequalities (Lemma~\ref{lem:downspread}) & 531\,897\,850\\
+excluded by Lemma~\ref{lem:quadfilter} & 41\,498\\
+excluded by (NS) in the enumerator & 2\,532\\
+excluded by (RIG) in the enumerator & 1\,619\,004\\
+remaining & 1\,522\\
+\midrule
+irreducible among them & 23\\
+exact tests in $\Z[x_1]$ (\S\ref{sec:caseA}): NS / BC / RG & 5 / 3 / 15\\
+\textbf{survivors} & \textbf{0}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{proof}[Proof of Theorem~\ref{thm:seven}]
+A suitable normalisation of the shortest vector $x_1$ of $K$ has its minimal polynomial among
+the enumerated leaves.  Every irreducible leaf violates a necessary condition for being the
+minimal polynomial of a shortest vector of a field with a universal $\Z$-form.
+\end{proof}
+
+No number field and no maximal order is computed in degree $7$.  The in-enumerator tests (NS),
+(RIG) are the only new ingredients.  Each exclusion they make on an irreducible polynomial was
+re-checked in exact arithmetic (\file{verify\_strong.gp}): for (NS), the exact minimum of $\Var$
+on $\Z[x_1]\setminus\Z$ by Fincke--Pohst; for (RIG), \texttt{sqshape}, i.e.\ factorisation of
+$4^7m_\alpha((t^2+\kappa)/4)$ over $\Q$.  In degree $7$ this re-check covers
+$857\,103$ irreducible polynomials (the other $764\,433$ excluded polynomials are reducible), with no disagreement.  In degree $6$ it covers all
+$15\,714$ exclusions on irreducible polynomials made by the strong mode, also with no
+disagreement.  \file{run\_degree7.sh} reproduces the computation in about 30 minutes on
+4 cores.
+
+\section{Sharpenings}\label{sec:sharp}
+
+This section records improvements found after the proofs above.  They are not needed for
+Theorems~\ref{thm:main} and~\ref{thm:seven}.  They shrink the computation considerably, and
+they are used for Theorem~\ref{thm:eight} (\S\S\ref{sec:d8A}--\ref{sec:d8B}).
+
+\subsection{A single universal form}
+Oh \cite{Oh} determined minimal-rank $n$-universal lattices: $E_6\perp I_7$ and $E_7\perp I_6$
+are $6$-universal \cite[Thms.~2.3, 2.5]{Oh}; $E_8\perp I_7$ and $E_7\perp I_8$ are
+$7$-universal \cite[Cor.~3.2, Thm.~3.3]{Oh}; $E_8\perp I_8$ is $8$-universal
+\cite[Thm.~3.1]{Oh}; and $I_{n+3}$ is $n$-universal for $n\le5$.
+
+\begin{proposition}\label{prop:oh}
+Let $d\le8$, and let $U_d$ be $I_8$ ($d\le5$), $E_6\perp I_7$ ($d=6$), $E_8\perp I_7$ ($d=7$),
+or $E_8\perp I_8$ ($d=8$).  Let $U_d^{\mathrm{ev}}$ be its even sublattice: $D_8$, $E_6\perp D_7$,
+$E_8\perp D_7$, $E_8\perp D_8$ respectively.  For $\alpha\in\OK^+$, condition (N) holds if and
+only if $\alpha$ is represented over $\OK$ by the $\Z$-form $\Phi_d=\frac12Q_{U_d^{\mathrm{ev}}}$.  In
+particular, $K$ admits a universal $\Z$-form if and only if $\Phi_d$ is universal over $K$.
+\end{proposition}
+
+\begin{proof}
+If (N) holds, then $2\alpha=Q_L(v)$ with $L$ even, positive definite, of rank $\le d$.  By
+$d$-universality there is an isometric embedding $L\to U_d$, and its image consists of vectors
+of even norm, hence lies in $U_d^{\mathrm{ev}}$.  The Gram matrix of $\Phi_d$ is half-integral with
+integral diagonal, so the converse is Lemma~\ref{lem:N} applied to $Q=\Phi_d$.
+\end{proof}
+
+So in degree $6$, besides the sums of squares with parity (the $D_7$ part) only one extra
+lattice appears, and it is $E_6$.  This is the structural form of
+Proposition~\ref{prop:e6}.  (N) can also be decided by searching representations by one fixed
+form of rank $\le 16$.
+
+\subsection{Sharpened rigidity and the square dichotomy}
+In the proof of Proposition~\ref{prop:rigidity}, $c=B(e,r)$ and $b=Q_L(r)/2$, so by the
+Cauchy--Schwarz inequality in $L$
+\[
+\kappa:=4b-c^2=Q_L(e)Q_L(r)-B(e,r)^2\ \ge\ 0 .
+\]
+Moreover $\tau(\alpha)=\Var(y)+(\tau(y)+c/2)^2+\kappa/4$, where $\Var(y)\ge\nu(K)$.
+
+\begin{proposition}\label{prop:sharp}
+Under the hypotheses of Proposition~\ref{prop:rigidity} we have $4\alpha=z^2+\kappa$ with
+$z\in\OK$, $\kappa\in\Z_{\ge0}$, $\kappa\equiv0,3\pmod4$ and
+$\kappa+\tau(z)^2\le4(\tau(\alpha)-\nu(K))$.  Consequently:
+\begin{enumerate}[label=(\alph*)]
+\item\emph{(square dichotomy)} if $\tau(\alpha)<\min(\frac32\nu(K),\nu(K)+\frac34)$, then
+  $\alpha$ is a square in $\OK$;
+\item\emph{(relative version)} if $F\subsetneq K$ and $\alpha\notin F$ has
+  $\tau(\alpha)<\frac32\nurel$, then $\alpha=y^2+\gamma y+\beta$ as in
+  Proposition~\ref{prop:relative}, with $4\beta-\gamma^2$ totally non-negative in $\OF$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+If $\kappa\ne0$ then $\kappa\ge3$ and $\tau(\alpha)\ge\nu+\frac34$.  If $\kappa=0$, then $c$ is
+even and $\alpha=(y+c/2)^2$.  For (b), apply Cauchy--Schwarz at every real place of $F$.
+\end{proof}
+
+The effect is visible at once.  In degrees $2$ and $3$, the order-level filters with the
+sharpened test leave exactly $\Q(\sqrt5)$ and $\Q(\zeta_7)^+$, so no (N) search is needed:
+$2\pm\sqrt2$ and $2-\zeta_9-\zeta_9^{-1}$ are window elements that are not squares.  In the
+degree-$6$ Case B, $17$ of the $18$ fields fail the sharpened rigidity (\file{sharp.gp}), and
+only $\Q(\sqrt5,\zeta_7^+)$ needs condition (N).
+
+The square dichotomy also constrains Case B before any enumeration.  If $x_1\in F$, then
+$\nu(K)=\nu(F)$ and every window element of $F$ must be a square in $K$.  If $[K:F]$ is odd,
+it must already be a square in $F$.  If $[K:F]=2$, a non-square $\alpha$ forces $K=F(\sqrt\alpha)$.
+In degree $6$ this gives the following.  $F=\Q(\sqrt2)$ is impossible, since it would force
+$\Q(\zeta_{16})^+\subset K$.  $F=\Q(\zeta_9)^+$ forces
+$K=F(\sqrt{2-\zeta_9-\zeta_9^{-1}})=\Q(\zeta_{36})^+$, which fails the sharpened rigidity.
+Only $F=\Q(\sqrt5)$ and $F=\Q(\zeta_7)^+$ need a relative enumeration.
+
+\subsection{Integrality-refined bound for \texorpdfstring{$\nu$}{nu}}
+With the integer parts kept, the downspread conditions read $\theta_1\le L=\lfloor\tau-\nu+1\rfloor$ and
+$\theta_d\ge U=\lceil\tau+\nu-1\rceil$.  With $a=\tau-L$ and $b=U-\tau$, Cauchy--Schwarz on the
+middle conjugates gives $d\nu\ge a^2+b^2+(a-b)^2/(d-2)$.  For each trace class this is a
+smaller range (\file{refined\_bound.py}):
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+$d$ & Corollary~\ref{cor:nubound} & refined, $\Tr x_1=0,1,2,\dots$\\
+\midrule
+6 & $4.791$ & $4.000,\ 4.139,\ 4.222,\ 4.250$\\
+7 & $5.312$ & $4.857,\ 4.694,\ 4.204,\ 4.245$\\
+8 & $5.828$ & $5.000,\ 5.109,\ 5.188,\ 5.234,\ 5.500$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Pruning the enumeration}
+The same conditions give $\theta_1-\tau\le-a$ and $\theta_d-\tau\ge b$.  Two consequences can be
+tested inside the Rolle tree, and they remove only subtrees without admissible leaves:
+\begin{itemize}[leftmargin=*]
+\item every even centred power sum satisfies $M_k=\sum_j(\theta_j-\tau)^k\ge a^k+b^k$, and $M_4$,
+  $M_6$ are fixed at depths $4$, $6$;
+\item the middle conjugates lie in $\tau\pm r$ with $r^2=S-a^2-b^2$.  Since the $i$-th root of
+  $f^{(d-m)}$ lies in $[\theta_i,\theta_{i+d-m}]$, the roots $2,\dots,m-1$ of $g_m$ lie in that
+  window.
+\end{itemize}
+The enumerator output is unchanged bit for bit.  In degree $6$ the number of leaves drops
+from $2\,088\,667$ to $178\,438$.  In degree $7$ it drops from $533\,562\,406$ to $7\,577\,940$,
+and the running time from about $25$ minutes to about $1$ minute on $4$ cores.
+
+\subsection{Degree 8, Case A: the rung split}\label{sec:d8A}
+Let $x_1$ realise $\nu=\nu(K)$, with conjugates $\theta_1<\dots<\theta_d$, $\tau=\tau(x_1)$,
+and put $m=\min(\frac32\nu,\nu+\frac34)$.  Let $n=\lceil\theta_1\rceil-1$ (the \emph{lower rung}),
+so $x_1-n\succ0$ and $\tau_-=\tau-n\ge\nu$ by budget--cost.  Similarly
+$n'=\lfloor\theta_d\rfloor+1$ and $\tau_+=n'-\tau\ge\nu$.
+
+\begin{lemma}\label{lem:rung}
+Exactly one of the following holds.
+\begin{enumerate}[label=(\roman*)]
+\item[(X)] $\tau_-\ge m$ and $\tau_+\ge m$; then $\theta_1\le\lfloor\tau-m\rfloor+1$ and
+  $\theta_d\ge\lceil\tau+m\rceil-1$.
+\item[(YL)] $\tau_-<m$; then $x_1-n=y^2$ with $y\in\OK$, $\Var(y)\ge\nu$,
+  $\tau(y)^2\le\tau_--\nu$, $\sum_j y_j^2=d\tau_-$ and
+  $\sum_j y_j^4=d\,\Var(x_1)+d\tau_-^2$.
+\item[(YU)] $\tau_+<m$; then $n'-x_1=y^2$ with the same conditions.
+\end{enumerate}
+In cases (YL)/(YU) the element $y$ also satisfies the downspread conditions of
+Corollary~\ref{cor:nubound} with respect to $\nu$.
+\end{lemma}
+
+\begin{proof}
+If $\tau_-<m$, Proposition~\ref{prop:sharp}(a) makes $x_1-n$ a square $y^2$.  Then
+$\tau_-=\tau(y^2)=\Var(y)+\tau(y)^2$ with $\Var(y)\ge\nu$ (as $y\notin\Z$).  The power sums
+follow from $y_j^2=\theta_j-n$ and $\Var(x_1)=\Var(y^2)$.  If $\tau_-\ge m$, then
+$n\le\lfloor\tau-m\rfloor$ and $\theta_1\le n+1$.  The upper end is symmetric.  Both
+$\tau_\pm<m$ may hold at once; such $x_1$ are found in both (YL) and (YU).  The last
+sentence is budget--cost for $y-\lceil y_1\rceil+1$ and $\lfloor y_d\rfloor+1-y$.
+\end{proof}
+
+In mode (X) the extreme conjugates are pushed a whole unit further out than the downspread
+alone gives, which the tree pruning of the previous subsection turns into a much smaller
+tree.  In modes (YL)/(YU) one enumerates $y$ instead of $x_1$.  Here $p_2(y)=d\tau_-$ is fixed,
+$p_4(y)$ is fixed (it pins $a_4$ through Newton's identity), and $|p_1(y)|\le d\sqrt{\tau_--\nu}$.
+The polynomial of $x_1$ is then computed exactly (\texttt{\_\_int128}) from that of $y$ as
+$G(t\mp n)$ with $G(u^2)=\pm f_y(u)f_y(-u)$, and the usual filters are applied to $x_1$.
+All of this is in \file{enum6.c}, argument \texttt{X}, \texttt{YL} or \texttt{YU}.
+
+\paragraph{Validation.}  In degrees $6$ and $7$ the split run was compared with the plain
+sharpened run on all subtrees.  In degree $8$ it was compared on all $60$ subtrees with
+$S\le24$.  Every polynomial found by one run but not the other is either reducible, or
+irreducible and certified in exact arithmetic (\file{verify\_split.gp}): a side with
+$\tau_\pm<m$ has no square root in $\OK$, or its square root violates budget--cost.  The
+latter happens because the split run applies the extra valid test on $y$.
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+$d$ & only plain: reducible & only plain: certified & only split (all reducible)\\
+\midrule
+6 & 10 & 1 & yes\\
+7 & 27 & 2 & yes\\
+8 ($S\le24$) & 99 & 5 & 46\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Result.}  The complete degree-$8$ Case A run (all $a_1,a_2$ allowed by
+$\nu\le3+2\sqrt2$, Corollary~\ref{cor:nubound}) visits $6\,012\,361$ leaves and takes $37$ seconds on $4$ cores.  It produces
+$13\,187$ distinct polynomials, of which $82$ are irreducible.  The exact tests in
+$\Z[x_1]$ (\file{order\_filter.gp}) exclude $78$ of them: NS $7$,
+BC $1$, RG $70$.  The four remaining orders
+\[
+x^8-8x^6+16x^4-8x^2+1,\ x^8-8x^6+18x^4-12x^2+2,\ x^8-8x^6+17x^4-10x^2+1,\ x^8-8x^6+19x^4-14x^2+1
+\]
+all fail the sharpened rigidity in the maximal order (\file{fieldtest2}, RG2).
+\emph{Hence Case A of degree $8$ is empty.}
+
+\subsection{Degree 8, Case B: the shortest vector lies in a proper subfield}\label{sec:d8B}
+Everything in \S\S\ref{sec:tensor}--\ref{sec:bounds} holds for $d=8$ (tensor rank $\le7$,
+$s/\gamma_s^2\ge\frac32$), including Proposition~\ref{prop:relative},
+Lemma~\ref{lem:reldown} and Corollary~\ref{cor:relbound}.  Let $F=\Q(x_1)\subsetneq K$, so
+$[F:\Q]\in\{2,4\}$ and $\nu(K)=\nu(F)$.  The downspread conditions involve only the
+conjugates of $x_1$, so $x_1$ appears in the degree-$[F:\Q]$ enumeration.
+
+\paragraph{Square forcing} (\file{sqforce8.gp}).  If $L$ is a field with $x_1\in L\subseteq K$,
+then every window element of $L$, i.e.\ every totally positive $\alpha\in\mathcal O_L\setminus\Z$ with
+$\tau(\alpha)<\min(\frac32\nu,\nu+\frac34)$, is a square in $\OK$
+(Proposition~\ref{prop:sharp}(a)).  So a window non-square $\alpha$ of $L$ forces
+$L(\sqrt\alpha)\subseteq K$.  Iterating this up to degree $8$ gives:
+\begin{itemize}[leftmargin=*]
+\item \emph{Quartic $F$.}  The degree-$4$ enumeration with the tests valid in a subfield (NS, BC)
+  leaves $10$ fields.  For $6$ of them the order $\Z[x_1]$ does not realise $\nu(F)$, which
+  contradicts $\nu(K)=\Var(x_1)$.  For the other $4$ ($d_F=1957,2048,2304,3981$) the forced
+  octic field still has a window non-square, which is impossible.
+\item \emph{$F=\Q(\sqrt2)$.}  $2-\sqrt2$ forces $\Q(\zeta_{16})^+$.  Its window then forces
+  $\Q(\zeta_{32})^+$, which has a window non-square: impossible.
+\item \emph{$F=\Q(\sqrt5)$.}  $\nu=\frac54$ and the only window element is
+  $\varphi^2$, a square, so nothing is forced.
+\end{itemize}
+
+\paragraph{$F=\Q(\sqrt5)$} (\file{rel8.gp}).  Let $\beta\in\OK\setminus F$ realise
+$\nurel$.  Corollary~\ref{cor:relbound} with $e=4$ and $\delta_F\le1.3110$ gives
+$\nurel\le4.2142$.  Either $F(\beta)=K$ or $F'=F(\beta)$ is a quartic field.
+\begin{itemize}[leftmargin=*]
+\item \emph{$F'$ quartic.}  $\beta=(-b+\sqrt D)/2$ with $D\in\OF^+$ and $\Tr D\le8\nurel$.  With
+  the exact relative downspread test (Lemma~\ref{lem:reldown} with the actual covering
+  value $\delta(m)$ for the target in place of $\delta_F$), only two
+  fields remain: $F'$ of discriminant $725$ ($x^4-x^3-3x^2+x+1$, the totally real quartic
+  field of least discriminant) and $F'=\Q(\sqrt2,\sqrt5)$ ($d_{F'}=1600$).  In both, every window element is a square,
+  so nothing is forced.  $K/F'$ is then a relative quadratic, with $x_1\in F\subset F'$ and
+  $\nu_{K/F'}$ bounded by Corollary~\ref{cor:relbound} ($e=2$).  Here
+  $\delta_{F'}\le1.9144$ resp.\ $2.1567$ (\file{deltaF.py}, grid step $0.1$), so
+  $\nu_{K/F'}\le3.886$ resp.\ $4.21$.  Before the order-level tests we apply the exact
+  relative downspread test: no $\gamma\in\mathcal O_{F'}$ may give $\beta'+\gamma\succ0$ with
+  $\tau(\beta'+\gamma)<\nu_{K/F'}$, for $\beta'=\pm\beta$ (\texttt{enum\_e2g8}).
+\item \emph{$K=F(\beta)$.}  Relative quartics $x^4+c_1x^3+\dots+c_4$ over $\OF$, with
+  $c_1$ reduced modulo $4\OF$ and up to the conjugation $\sqrt5\mapsto-\sqrt5$, which leaves
+  $10$ residues.  $c_2$ ranges over a box given by the relative variance, and $c_3,c_4$ over
+  Rolle intervals at both real places of $F$.  The exact relative downspread test comes
+  first, then irreducibility over $F$, and then the relative order-level tests NSR, BCR and
+  RGR in $\OF[\beta]$ (\file{rel6.gp}).
+\end{itemize}
+\paragraph{Result for $F=\Q(\sqrt5)$.}
+\begin{itemize}[leftmargin=*]
+\item Relative quartics: $468\,986$ polynomials in the boxes.  The exact relative downspread
+  test removes $450\,708$ of them.  Of the irreducible ones, the relative order-level tests
+  exclude $7\,316$ (NSR $1\,577$, BCR $5\,739$), and $815$ remain.  Running time about
+  $15$--$30$ minutes per residue on one core (\file{run\_q4\_par.sh}).
+\item $K/F'$ quadratic: $F'$ of discriminant $725$ gives $23\,613$ values of $D$, with $930$
+  removed by the relative downspread test, $161$ by NSR/BCR, and $52$ left.  $F'=\Q(\sqrt2,\sqrt5)$
+  gives $20\,976$ values of $D$, with $859$ / $108$ / $97$.
+\item The $964$ order-level survivors give $390$ distinct octic fields
+  (\file{collect8.gp}; list in \file{fields\_all.txt}).  In the maximal order,
+  $386$ fail the relative sharpened rigidity over $\Q(\sqrt5)$ (RGR2), and $2$ fail the relative
+  BC test.  Two fields survive:
+  \begin{itemize}
+  \item $K_1$: $x^8-2x^7-12x^6+26x^5+17x^4-36x^3-5x^2+11x-1$, $d_{K_1}=5^4\cdot29^4$.  This is the
+    Galois closure (dihedral of order $8$) of the quartic field of discriminant $725$.
+  \item $K_2$: $x^8-3x^7-4x^6+13x^5+5x^4-13x^3-4x^2+3x+1$, $d_{K_2}=5^4\cdot29^2\cdot1249$.
+    This is a non-Galois quadratic extension of the same quartic field.
+  \end{itemize}
+  Both fail (N) (\file{condN.gp}) at an element $\alpha$ of trace $18$ in a quartic
+  subfield of discriminant $725$, with minimal polynomial $x^4-9x^3+27x^2-31x+11$.  For $K_2$
+  it is the $11$th element tested by increasing trace.  For $K_1$ the search by increasing
+  trace finds it as the $21$st element.  Six earlier elements of trace $18$ exhaust the
+  $2$\,GB stack and are left undecided, which does not matter for the conclusion
+  (\file{witness\_k1\_d8.gp}).
+\end{itemize}
+Together with Case A (\S\ref{sec:d8A}) this proves Theorem~\ref{thm:eight}.  The
+floating-point caveats of \S\ref{sec:status} apply, now including $\delta_{F'}$ for the two
+quartic fields $F'$ (grid step $0.1$).
+
+\section{Consistency checks and status}\label{sec:status}
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Enumerator.}  \file{enum6.c} agrees exactly with an exact-arithmetic
+  re-implementation (\file{enum\_check.gp}, real-rootedness by Sturm sequences) on all 56
+  subtrees and all $2\,088\,667$ leaves in degree $6$, and with brute force over coefficient
+  boxes in degrees $3$--$5$.  In degree $7$ it agrees with \file{enum\_check.gp} on
+  the $48$ subtrees with the fewest leaves ($2\,267\,434$ leaves in total).
+\item \textbf{Degrees $\le5$ reproduced.}  The same pipeline, with the degree-$d$ bound of
+  Corollary~\ref{cor:nubound}, leaves $\Q(\sqrt2)$, $\Q(\sqrt5)$ in degree $2$, and
+  $\Q(\zeta_9)^+$, $\Q(\zeta_7)^+$ in degree $3$.  Of these, $\Q(\sqrt2)$ and
+  $\Q(\zeta_9)^+$ fail (N) at $2-\sqrt2$ and $2-\zeta_9-\zeta_9^{-1}$.  Nothing is left in
+  degree $5$.  In degree $4$, Case A leaves nothing, and Case B leaves three fields
+  ($d_K=725,1600,7168$), all failing (N).  This recovers \cite[Thm.~1.2]{KY-EB}.
+\item \textbf{Controls.}  (N) holds for all tested elements of $\Q(\sqrt5)$ and
+  $\Q(\zeta_7)^+$; both fields survive every filter.
+\item \textbf{Degree 8} (\file{validate8.sh}).
+  \begin{enumerate}[label=(\alph*)]
+  \item Every exclusion made inside the split enumerator on an irreducible polynomial is
+    re-checked in exact arithmetic (\file{verify\_split.gp}, \texttt{vsharp}).  There are
+    $108\,159$ of them (NS $24$, sharpened RIG $107\,539$, $y$-budget $596$), with no
+    disagreement.  The other $484\,381$ excluded polynomials are reducible.
+  \item At every one of the $392$ maximal-order exclusions (Case A: $4$ RG2; Case B:
+    $386$ RGR2, $2$ BCR), condition (N) is decided directly at the element named by the test
+    (\file{certN8.gp}).  It fails in all $392$ cases, so every excluded octic field has two
+    independent certificates.
+  \item The relative-quartic candidates of \texttt{enum\_q4} coincide, for all $16$ residues
+    of $c_1$, with an independent brute-force search (\file{check\_q4.gp}).  That search uses
+    power-sum boxes for $c_2,c_3,c_4$ and an exact real-rootedness test via the norm
+    polynomial and Sturm sequences.  No candidate is missing, and none is superfluous.
+  \item The rung split was compared with the plain enumerator on all $90$ subtrees with
+    $S\le36$ (\file{compare\_split.sh}).  Every polynomial found by only one of the runs is
+    reducible, or certified exactly: its forced side has no square root, or the square root
+    violates budget--cost.  The $25$ subtrees with $36<S\le8(3+2\sqrt2)$ were not compared,
+    because the plain run is too slow there (the subtree $(-4,-11)$ with $S=36$ takes
+    $52$ minutes).
+  \end{enumerate}
+\item \textbf{Floating point.}  Used for embeddings (60 digits), for root brackets in the
+  enumerator (80-bit, with margins), and for $\delta_F$ (double precision with a grid margin
+  of $0.002$ resp.\ $0.02$).  The grid values $\delta_{\Q(\sqrt5)}\approx1.3090=\varphi^2/2$ and
+  $\delta_{\Q(\sqrt2)}\approx1.7071=1+1/\sqrt2$ are consistent with exact values.
+\item \textbf{Recommended before publication.}  An independent re-implementation of Case A
+  and of the (N) searches (for example in Magma), and an exact-arithmetic computation of
+  $\delta_F$ for the four fields.
+\end{itemize}
+
+\begin{remark}[degree $9$ and beyond]
+Lemma~\ref{lem:tensor} gives $s/\gamma_s^2\ge\frac32$ for $s\le8$ ($\gamma_7^7=64$,
+$\gamma_8=2$).  So budget--cost, rigidity, the square dichotomy and
+Corollary~\ref{cor:nubound} hold for $d\le9$, and a sextic, septic or octic tensor rank never
+exceeds $8$.  In degree $9$, $\nu(K)\le(13+\sqrt{153})/4\approx6.34$.  Case B there has cubic
+subfields with relative degree $3$ (where window elements of $F$ must already be squares in
+$F$).  For Case A the rung split of \S\ref{sec:d8A} carries over unchanged.  From degree $10$
+on, the tensor floor must be re-examined ($\gamma_9$, $\gamma_{10}$).
+\end{remark}
+
+\begin{thebibliography}{KY2}
+
+\bibitem[CS]{CS}
+J.~H. Conway, N.~J.~A. Sloane,
+\emph{Sphere Packings, Lattices and Groups}, 3rd ed., Grundlehren Math. Wiss. 290,
+Springer, 1999.
+
+\bibitem[Ki]{Ki}
+Y.~Kitaoka, \emph{Arithmetic of Quadratic Forms}, Cambridge Tracts in Math. 106,
+Cambridge University Press, 1993.
+
+\bibitem[Ko]{Ko}
+C.~Ko, On the representation of a quadratic form as a sum of squares of linear forms,
+Q. J. Math. 1 (1937), 81--98.
+
+\bibitem[KY1]{KY1}
+V.~Kala, P.~Yatsyna, Lifting problem for universal quadratic forms,
+Adv. Math. 377 (2021), 107497.
+
+\bibitem[KY2]{KY-EB}
+V.~Kala, P.~Yatsyna, Even better sums of squares over quintic and cyclotomic fields,
+arXiv:2402.03850v2.
+
+\bibitem[MS]{MS}
+J.~McKee, C.~Smyth, Salem numbers of trace $-2$ and traces of totally positive algebraic
+integers, in \emph{Algorithmic Number Theory}, Lecture Notes in Comput. Sci. 3076,
+Springer, 2004, 327--337.
+
+\bibitem[Mo]{Mo}
+L.~J. Mordell, The representation of a definite quadratic form as a sum of two others,
+Ann. of Math. 38 (1937), 751--757.
+
+\bibitem[Oh]{Oh}
+B.-K. Oh, Universal $\Z$-lattices of minimal rank, Proc. Amer. Math. Soc. 128 (2000),
+683--689.
+
+\bibitem[Pack]{Pack}
+\emph{Flatness, variance, and the lifting problem}, working notes (unpublished).
+
+\bibitem[Ro]{Ro}
+R.~Robinson, Algebraic equations with span less than 4, Math. Comp. 18 (1964), 547--559.
+
+\bibitem[Se]{Se}
+J.-P. Serre, \emph{A Course in Arithmetic}, Grad. Texts in Math. 7, Springer, 1973.
+
+\end{thebibliography}
+
+\end{document}

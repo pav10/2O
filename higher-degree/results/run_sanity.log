@@ -1,0 +1,27 @@
+== primitive case (x_1 generates K), degrees 2..5
+../results/sanity_d2.txt: 5 polys, 2 irreducible; Mat(["OK", 2])
+  survivors: [[x^2 - 2, x^2 - 2, 8], [x^2 - x - 1, x^2 - x - 1, 5]]
+../results/sanity_d3.txt: 17 polys, 4 irreducible; ["BC", 1; "OK", 3]
+  survivors: [[x^3 - 3*x - 1, x^3 - 3*x - 1, 81], [x^3 - 3*x + 1, x^3 - 3*x - 1, 81], [x^3 - x^2 - 2*x + 1, x^3 - x^2 - 2*x + 1, 49]]
+../results/sanity_d4.txt: 158 polys, 35 irreducible; ["BC", 18; "NS", 5; "RG", 12]
+  survivors: []
+../results/sanity_d5.txt: 1096 polys, 244 irreducible; ["BC", 111; "NS", 46; "RG", 87]
+  survivors: []
+== (N) for the degree 2 and 3 survivors
+[x^2 - 2, "WITNESS", x + 2, "Tr", 4, "N", 2, "minpoly", x^2 - 4*x + 2, "tested", 1, "ms", 0]
+[x^3 - 3*x - 1, "WITNESS", -x^2 + 4, "Tr", 6, "N", 3, "minpoly", x^3 - 6*x^2 + 9*x - 3, "tested", 2, "ms", 0]
+[x^2 - x - 1, "none below tau", 3, "tested", 4]
+[x^3 - x^2 - 2*x + 1, "none below tau", 3, "tested", 12]
+== degree 4, imprimitive case (F = Q(sqrt5), Q(sqrt2))
+Q(sqrt5) (d=4): nu_rel <= 3.06039985593083850011073504034927117959183196360698406247220, Tr(Delta) <= 24.4831988474467080008858803227941694367346557088558724997776, 134 totally positive Delta
+Q(sqrt5): ["BCR", 9; "NSR", 8; "OK", 3]
+Q(sqrt2) (d=4): nu_rel <= 3.60877853452140931230718307531011632417971149644779603775888, Tr(Delta) <= 28.8702282761712744984574646024809305934376919715823683020710, 148 totally positive Delta
+Q(sqrt2): ["BCR", 11; "NSA", 1; "NSR", 4; "OK", 3; "RGA", 5]
+6 survivors, fields: [[x^4 - x^3 - 3*x^2 + x + 1, 725, [["Q(sqrt5)", 11/8], ["Q(sqrt5)", 11/8]]], [x^4 - 6*x^2 + 4, 1600, [["Q(sqrt5)", 2], ["Q(sqrt2)", 5/2]]], [x^4 - 6*x^2 + 7, 7168, [["Q(sqrt2)", 3], ["Q(sqrt2)", 3]]]]
+x^4 - x^3 - 3*x^2 + x + 1 ["OK", 5/4, [[x^2 - x - 1, 11/8]]]
+   [x^4 - x^3 - 3*x^2 + x + 1, "WITNESS", x + 2, "Tr", 9, "N", 11, "minpoly", x^4 - 9*x^3 + 27*x^2 - 31*x + 11, "tested", 9, "ms", 0]
+x^4 - 6*x^2 + 4 ["OK", 5/4, [[x^2 - 10, 1/2], [x^2 - 2, 5/4], [x^2 - 12*x + 16, 2]]]
+   [x^4 - 6*x^2 + 4, "WITNESS", 1/2*x^3 - 2*x + 2, "Tr", 8, "N", 4, "minpoly", x^2 - 4*x + 2, "tested", 3, "ms", 0]
+x^4 - 6*x^2 + 7 ["OK", 2, [[x^2 + 6*x + 7, 3]]]
+   [x^4 - 6*x^2 + 7, "WITNESS", x^2 - 1, "Tr", 8, "N", 4, "minpoly", x^2 - 4*x + 2, "tested", 1, "ms", 0]
+EXIT 0
