@@ -1,0 +1,5 @@
+subtrees 26, compared 26, timed out 0
+only-plain 2  only-split 0
+only-plain: Mat(["reducible", 2])
+only-split: [;]
+note: subtree (0,-20) was run with its plain part split 4 ways by a3 mod 4 (ENUM_A3MOD) after two container restarts; (-1,-23) has S = 46.875 > 8(3+2 sqrt2) and is an extra check

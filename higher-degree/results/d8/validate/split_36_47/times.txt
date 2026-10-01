@@ -1,0 +1,26 @@
+-4 -16 plain=done 0s plain=0 split=0
+-1 -23 plain=done 0s plain=0 split=0
+-3 -19 plain=done 0s plain=0 split=0
+0 -23 plain=done 0s plain=0 split=0
+-2 -21 plain=done 0s plain=0 split=0
+0 -22 plain=done 0s plain=0 split=0
+-1 -22 plain=done 0s plain=0 split=0
+-3 -18 plain=done 0s plain=0 split=0
+-2 -20 plain=done 0s plain=0 split=0
+-1 -21 plain=done 0s plain=0 split=0
+0 -21 plain=done 0s plain=0 split=0
+-2 -19 plain=done 1s plain=0 split=0
+-1 -20 plain=done 0s plain=0 split=0
+-3 -17 plain=done 4s plain=0 split=0
+-4 -13 plain=done 0s plain=0 split=0
+-3 -16 plain=done 0s plain=0 split=0
+-2 -18 plain=done 0s plain=0 split=0
+-4 -14 plain=done 6s plain=0 split=0
+-4 -15 plain=done 165s plain=0 split=0
+-4 -12 plain=done 1s plain=0 split=0
+-3 -15 plain=done 0s plain=0 split=0
+-2 -17 plain=done 136s plain=2 split=0
+0 -19 plain=done 312s plain=0 split=0
+-1 -18 plain=done 93s plain=0 split=0
+-1 -19 plain=done 664s plain=0 split=0
+0 -20 plain=done 507s(4 parts by a3 mod 4) split=0s plain=0 split=0

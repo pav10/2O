@@ -59,6 +59,7 @@ static ld TAUX = 0, VARX = 0, NU = 0, XA = 0, XB = 0;
 static long long n_rung = 0, n_ybud = 0;
 static long long n_leaf = 0, n_out = 0, n_f1 = 0, n_f2 = 0, n_f3 = 0, n_ns = 0, n_rig = 0;
 static int NOFILTER = 0, STRONG = 0, WHY = 0, SHARP = 0;
+static long A3K = 0, A3N = 0;          /* optional split of a subtree by a3 mod A3N (env ENUM_A3MOD=k/n) */
 /* moment pruning (only when filters are on): F1/F2 force theta_1 - tau <= -AA and
  * theta_d - tau >= BB, hence every even centred power sum M_k >= AA^k + BB^k.
  * M_k depends only on a_1..a_k, so whole subtrees are cut at level k = 4, 6. */
@@ -410,6 +411,7 @@ static void rec(int m)
         amin = amax = a4;
     }
     for (long am = amin; am <= amax; am++) {
+        if (m == 3 && A3N > 0 && ((am % A3N) + A3N) % A3N != A3K) continue;   /* ENUM_A3MOD=k/n */
         a[m] = am;
         if (m == N) { leaf(); continue; }
         if (!NOFILTER && ((N > 4 && m == 4) || (N > 6 && m == 6)) && AA > 0 && BB > 0) {
@@ -487,6 +489,7 @@ int main(int argc, char **argv)
             Cb[n][k] = (k == 0 || k == n) ? 1 : Cb[n - 1][k - 1] + Cb[n - 1][k];
     /* d*nu_max with d*nu >= 2(nu-1)^2:  nu_max = ((d+4)+sqrt((d+4)^2-16))/4 */
     SMAX = (ld)N * ((N + 4) + sqrtl((ld)(N + 4) * (N + 4) - 16)) / 4 + 1e-9L;
+    { const char *e = getenv("ENUM_A3MOD"); if (e) sscanf(e, "%ld/%ld", &A3K, &A3N); }
     a[0] = 1;
     a[1] = atol(argv[1]);
     a[2] = atol(argv[2]);

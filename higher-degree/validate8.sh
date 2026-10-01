@@ -6,7 +6,7 @@
 #      maximal-order exclusion (Case A: RG2; Case B: RGR2, BCR), which must fail (N);
 #  (3) the relative-quartic candidate generation of enum_q4 is compared with an independent
 #      brute-force search (check_q4.gp), for all 16 residues of c1;
-#  (4) the rung split is compared with the plain enumerator on all subtrees with S <= 36
+#  (4) the rung split is compared with the plain enumerator on all 115 subtrees of Case A
 #      (compare_split.sh), every difference certified by verify_split.gp.
 # Running time: (1) 5 min, (2) 1 min, (3) about 1 hour, (4) several hours, on 4 cores.
 set -e
@@ -46,3 +46,4 @@ echo "== (4) rung split versus plain enumeration"
 ./compare_split.sh 8 0 24 $V/split_0_24 4 3600
 ./compare_split.sh 8 24 30 $V/split_24_30 4 3600
 ./compare_split.sh 8 30 36 $V/split_30_36 3 5400
+./compare_split.sh 8 36 47 $V/split_36_47 4 86400
