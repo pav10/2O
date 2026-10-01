@@ -845,6 +845,10 @@ quartic fields $F'$ (grid step $0.1$).
     slowest plain runs take up to $52$ minutes; the subtree $(0,-20)$ was split $4$ ways by
     $a_3\bmod 4$ (\texttt{ENUM\_A3MOD}).
   \end{enumerate}
+  \textbf{Reproduction.}  \file{run\_degree8.sh} was rerun from scratch in a clean copy of the
+  repository.  It reproduces every intermediate count and the final field list exactly (fields,
+  discriminants and verdicts of all $390$ Case B fields); for $3$ fields a different subfield
+  is named in the RGR2 certificate, as the order of \texttt{nfsubfields} varies.
 \item \textbf{Floating point.}  Used for embeddings (60 digits), for root brackets in the
   enumerator (80-bit, with margins), and for $\delta_F$ (double precision with a grid margin
   of $0.002$ resp.\ $0.02$).  The grid values $\delta_{\Q(\sqrt5)}\approx1.3090=\varphi^2/2$ and

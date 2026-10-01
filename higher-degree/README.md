@@ -179,6 +179,13 @@ hours on 4 cores, mostly the relative quartics and the maximal-order tests of 39
 * **Relative-quartic candidates confirmed by brute force.** `check_q4.gp` searches
   power-sum boxes and tests real-rootedness exactly (norm polynomial, Sturm). For all 16
   residues of c₁ it returns exactly the candidate set of `enum_q4`.
+* **End-to-end reproduction.** `run_degree8.sh` was rerun from scratch in a clean copy and
+  reproduces every count and the final list of 390 fields with their verdicts.
+* **Rigorous covering constants.** `deltaF.py` now accepts a lattice point only with a 1e-9
+  margin, so its bounds are rigorous despite floating point. With finer grids every constant
+  used in the proofs is at or above its rigorous bound (table in §4 of the notes). The old
+  4-decimal constants had been rounded down by about 2e-5, but the finer grids cover this
+  without changing any enumeration.
 * **Split versus plain enumeration.** The two agree on all 115 subtrees of Case A
   (`compare_split.sh`), up to polynomials that are reducible or certified exactly: 144 found
   only by the plain run (137 reducible, 7 certified) and 46 only by the split run (all
