@@ -179,9 +179,10 @@ hours on 4 cores, mostly the relative quartics and the maximal-order tests of 39
 * **Relative-quartic candidates confirmed by brute force.** `check_q4.gp` searches
   power-sum boxes and tests real-rootedness exactly (norm polynomial, Sturm). For all 16
   residues of c₁ it returns exactly the candidate set of `enum_q4`.
-* **Split versus plain enumeration.** The two agree on all 90 subtrees with S ≤ 36
-  (`compare_split.sh`), up to polynomials that are reducible or certified exactly. The
-  remaining 25 subtrees are too slow for the plain run.
+* **Split versus plain enumeration.** The two agree on all 115 subtrees of Case A
+  (`compare_split.sh`), up to polynomials that are reducible or certified exactly: 144 found
+  only by the plain run (137 reducible, 7 certified) and 46 only by the split run (all
+  reducible).
 
 ## Files
 

@@ -791,12 +791,13 @@ quartic fields $F'$ (grid step $0.1$).
     of $c_1$, with an independent brute-force search (\file{check\_q4.gp}).  That search uses
     power-sum boxes for $c_2,c_3,c_4$ and an exact real-rootedness test via the norm
     polynomial and Sturm sequences.  No candidate is missing, and none is superfluous.
-  \item The rung split was compared with the plain enumerator on all $90$ subtrees with
-    $S\le36$ (\file{compare\_split.sh}).  Every polynomial found by only one of the runs is
+  \item The rung split was compared with the plain enumerator on all $115$ subtrees of
+    Case A (\file{compare\_split.sh}).  Every polynomial found by only one of the runs is
     reducible, or certified exactly: its forced side has no square root, or the square root
-    violates budget--cost.  The $25$ subtrees with $36<S\le8(3+2\sqrt2)$ were not compared,
-    because the plain run is too slow there (the subtree $(-4,-11)$ with $S=36$ takes
-    $52$ minutes).
+    violates budget--cost.  In total $144$ polynomials were found only by the plain run
+    ($137$ reducible, $7$ certified), and $46$ only by the split run (all reducible).  The
+    slowest plain runs take up to $52$ minutes; the subtree $(0,-20)$ was split $4$ ways by
+    $a_3\bmod 4$ (\texttt{ENUM\_A3MOD}).
   \end{enumerate}
 \item \textbf{Floating point.}  Used for embeddings (60 digits), for root brackets in the
   enumerator (80-bit, with margins), and for $\delta_F$ (double precision with a grid margin
