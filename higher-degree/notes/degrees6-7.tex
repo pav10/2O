@@ -152,7 +152,7 @@ $\min L\ge2$, and every vector of $L$ that is not a minimal vector has norm $\ge
 Let $L,M$ be positive definite lattices (real quadratic forms on free $\Z$-modules), and let
 $w\in L\otimes M$, $w\ne0$, have tensor rank $s$.  Then
 $Q(w)\ge\frac{s}{\gamma_s^2}\min L\cdot\min M$, where $\gamma_s$ is Hermite's constant.
-In particular, for $s\le 6$,
+In particular, for $s\le 8$,
 \[
 Q(w)\ \ge\ \min L\cdot\min M,\qquad\text{and}\qquad Q(w)\ge\tfrac32\min L\cdot\min M\ \text{ if } s\ge2 .
 \]
@@ -166,15 +166,20 @@ matrices $X$ of the $x_i$ and $Y$ of the $y_i$ we have $Q(w)=\operatorname{tr}(X
 mean inequality, and $\det X\ge(\min L/\gamma_s)^s$, $\det Y\ge(\min M/\gamma_s)^s$ by
 Hermite's inequality for the lattices spanned by the $x_i$ and the $y_i$.  The known values
 $\gamma_1^2=1$, $\gamma_2^2=\frac43$, $\gamma_3^2=2^{2/3}$, $\gamma_4^2=2$,
-$\gamma_5^2=8^{2/5}$, $\gamma_6^2=(64/3)^{1/3}$ (see \cite{CS}) give
-$s/\gamma_s^2=1,\ 1.5,\ 1.889,\ 2,\ 2.176,\ 2.163$ for $s=1,\dots,6$.
+$\gamma_5^2=8^{2/5}$, $\gamma_6^2=(64/3)^{1/3}$, $\gamma_7^2=64^{2/7}$, $\gamma_8^2=4$ (see
+\cite{CS}) give $s/\gamma_s^2=1,\ 1.5,\ 1.889,\ 2,\ 2.176,\ 2.163,\ 2.133,\ 2$ for
+$s=1,\dots,8$.
 \end{proof}
 
-This is the elementary case of Kitaoka's theorem on minima of tensor products \cite{Ki}; we
-only need tensor rank $\le6$, because $\rk\LamK=d-1\le5$ when $d\le 6$.
+This is the elementary case of Kitaoka's theorem on minima of tensor products \cite{Ki}.
+Below, the tensor rank of an element of $L\otimes\LamK$ (or of $L\otimes\OK/\OF$) is at most
+$\rk\LamK=d-1$, so Lemma~\ref{lem:tensor} applies whenever $d\le9$.  This is the only place
+where the degree enters; all statements of \S\S\ref{sec:tensor}--\ref{sec:bounds} below that
+assume $d\le9$ hold for that reason (degrees $6,7,8$ are proved in this note; $d=9$ is
+discussed in \S\ref{sec:status}).
 
 \begin{proposition}[budget--cost]\label{prop:budget}
-Let $d\le7$ and suppose $K$ admits a universal $\Z$-form.  Then $\tau(\alpha)\ge\nu(K)$ for
+Let $d\le9$ and suppose $K$ admits a universal $\Z$-form.  Then $\tau(\alpha)\ge\nu(K)$ for
 every $\alpha\in\OK^+\setminus\Z$; that is, $t(K)\ge\nu(K)$.
 \end{proposition}
 
@@ -204,7 +209,7 @@ $2\alpha=2y^2+2B(e,r)y+Q_L(r)$ with $Q_L(r)\in2\Z$.  Finally $2\tau(\alpha)\ge\f
 \end{proof}
 
 \begin{proposition}[relative versions]\label{prop:relative}
-Suppose $K$ ($d\le 6$) admits a universal $\Z$-form, and let $F\subsetneq K$ be a subfield.
+Suppose $K$ ($d\le 9$) admits a universal $\Z$-form, and let $F\subsetneq K$ be a subfield.
 Then $\tau(\alpha)\ge\nurel$ for every $\alpha\in\OK^+\setminus F$.  If moreover
 $\tau(\alpha)<\frac32\nurel$, then $\alpha=y^2+\gamma y+\beta$ with $y\in\OK\setminus F$,
 $\beta,\gamma\in\OF$ and $\Var_{K/F}(y)\le\tau(\alpha)$.
@@ -231,7 +236,7 @@ $\tau(\alpha_+)=\lfloor\theta_d\rfloor+1-\tau(x)<\theta_d-\tau(x)+1$.
 \end{lemma}
 
 \begin{corollary}\label{cor:nubound}
-If $K$ of degree $d\le7$ admits a universal $\Z$-form, then $d\,\nu\ge2(\nu-1)^2$ for
+If $K$ of degree $d\le9$ admits a universal $\Z$-form, then $d\,\nu\ge2(\nu-1)^2$ for
 $\nu=\nu(K)$.  In particular $\nu(K)\le\frac{(d+4)+\sqrt{(d+4)^2-16}}{4}$, which for $d=6$
 is $(5+\sqrt{21})/2=4.7913\ldots$.
 \end{corollary}
@@ -269,7 +274,25 @@ For example $\delta_\Q=1$.  The function $h(u)=\min_{p>u}\sum_k(p_k-u_k)$ is
 $\sigma(\OF)$-periodic and satisfies $h(u)\le h(u')+\sum_k(u'_k-u_k)$ whenever $u\le u'$
 coordinatewise.  Evaluating $h$ on a grid of step $\varepsilon$ that covers a fundamental
 parallelepiped therefore gives the rigorous bound $\delta_F\le\max_{\mathrm{grid}}h/f+\varepsilon$
-(\file{deltaF.py}).
+(\file{deltaF.py}).  The computation is in double precision but only ever bounds $h$ from
+above: a lattice point $p$ is used for a grid point $u'$ only if $p_k>u'_k+10^{-9}$ in floating
+point, which implies $p>u'$ exactly, and $10^{-9}$ is added to the result.  The bounds used in
+this note are
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+$F$ & $\Q(\sqrt5)$ & $\Q(\sqrt2)$ & $\Q(\zeta_7)^+$ & $\Q(\zeta_9)^+$ & $d_F=725$ & $d_F=1600$\\
+\midrule
+grid step & $0.0005$ & $0.0005$ & $0.01$ & $0.01$ & $0.05$ & $0.1$\\
+rigorous bound & $1.30952$ & $1.70761$ & $1.54132$ & $2.14626$ & $1.90188$ & $2.156694$\\
+constant used & $1.3110$ & $1.7091$ & $1.5513$ & $2.1529$ & $1.9144$ & $2.1567$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Every constant used is at least the rigorous bound.  (An earlier version took the bounds from
+coarser grids rounded to four decimals; at that rounding the first four were about
+$2\cdot10^{-5}$ too small, and the coarse grid for $d_F=725$ missed the maximum.  The finer
+grids above remove both issues without changing any enumeration.)
 
 \begin{lemma}[relative downspread]\label{lem:reldown}
 For $y\in\OK\setminus F$ with block minima $m_k=\min_{j\in B_k}\sigma_j(y)$, there is
@@ -284,7 +307,7 @@ sum can be made $\le f\delta_F$ with all $\rho_k(\gamma)+m_k>0$.
 \end{proof}
 
 \begin{corollary}\label{cor:relbound}
-If $K$ ($d\le6$) admits a universal $\Z$-form and $F\subsetneq K$ with $e=[K:F]$, then
+If $K$ ($d\le9$) admits a universal $\Z$-form and $F\subsetneq K$ with $e=[K:F]$, then
 $e\,\nurel\ge2(\nurel-\delta_F)^2$.
 \end{corollary}
 
@@ -690,8 +713,31 @@ all fail the sharpened rigidity in the maximal order (\file{fieldtest2}, RG2).
 Everything in \S\S\ref{sec:tensor}--\ref{sec:bounds} holds for $d=8$ (tensor rank $\le7$,
 $s/\gamma_s^2\ge\frac32$), including Proposition~\ref{prop:relative},
 Lemma~\ref{lem:reldown} and Corollary~\ref{cor:relbound}.  Let $F=\Q(x_1)\subsetneq K$, so
-$[F:\Q]\in\{2,4\}$ and $\nu(K)=\nu(F)$.  The downspread conditions involve only the
-conjugates of $x_1$, so $x_1$ appears in the degree-$[F:\Q]$ enumeration.
+$[F:\Q]\in\{2,4\}$.
+
+\begin{lemma}\label{lem:subenum}
+Let $x_1$ realise $\nu(K)$ and $F=\Q(x_1)$ of degree $f<d$.  Then $\nu(K)=\nu(F)=\Var(x_1)$,
+and $x_1$ satisfies the downspread conditions and Lemma~\ref{lem:quadfilter} of degree $f$:
+$f\nu\ge2(\nu-1)^2$, both downspreads of $x_1$ are $\ge\nu$, and $P(\tau(x_1))\ge0$ for every
+monic $P\in\Z[t]$ of degree $2$ positive at the conjugates of $x_1$.  Moreover no element
+of $\Z[x_1]$ or of $\mathcal O_F$ outside $\Z$ has variance $<\nu$, and none in
+$\mathcal O_F^+\setminus\Z$ has $\tau<\nu$ (the tests NS, BC).
+\end{lemma}
+
+\begin{proof}
+$\Var$ and $\tau$ of an element of $F$ are the same whether computed in $F$ or in $K$ (each
+conjugate in $F$ occurs $d/f$ times), so $\nu(K)\le\nu(F)\le\Var(x_1)=\nu(K)$.  The
+downspread elements $x_1-n$, $n'-x_1$, $P(x_1)$ and the elements in NS and BC lie in $F\subset K$,
+so budget--cost in $K$ (Proposition~\ref{prop:budget}) applies to them, and its
+consequences are the stated inequalities, computed from the $f$ distinct conjugates.  The
+proof of Corollary~\ref{cor:nubound} then runs with the $f$ distinct conjugates.
+Rigidity is \emph{not} available in this form, since the $y$ of
+Proposition~\ref{prop:rigidity} may lie outside $F$.
+\end{proof}
+
+So $x_1$ appears in the degree-$f$ enumeration (\file{run\_enum.sh}, the files
+\file{sanity\_d2.txt}, \file{sanity\_d4.txt}), and only the tests NS and BC may be applied
+to it there.
 
 \paragraph{Square forcing} (\file{sqforce8.gp}).  If $L$ is a field with $x_1\in L\subseteq K$,
 then every window element of $L$, i.e.\ every totally positive $\alpha\in\mathcal O_L\setminus\Z$ with
@@ -700,8 +746,8 @@ $\tau(\alpha)<\min(\frac32\nu,\nu+\frac34)$, is a square in $\OK$
 $L(\sqrt\alpha)\subseteq K$.  Iterating this up to degree $8$ gives:
 \begin{itemize}[leftmargin=*]
 \item \emph{Quartic $F$.}  The degree-$4$ enumeration with the tests valid in a subfield (NS, BC)
-  leaves $10$ fields.  For $6$ of them the order $\Z[x_1]$ does not realise $\nu(F)$, which
-  contradicts $\nu(K)=\Var(x_1)$.  For the other $4$ ($d_F=1957,2048,2304,3981$) the forced
+  leaves $10$ fields.  For $6$ of them $\nu(\mathcal O_F)$ is smaller than $\Var(x_1)$ for every
+  candidate $x_1$ generating $F$, which contradicts Lemma~\ref{lem:subenum}.  For the other $4$ ($d_F=1957,2048,2304,3981$) the forced
   octic field still has a window non-square, which is impossible.
 \item \emph{$F=\Q(\sqrt2)$.}  $2-\sqrt2$ forces $\Q(\zeta_{16})^+$.  Its window then forces
   $\Q(\zeta_{32})^+$, which has a window non-square: impossible.
@@ -720,7 +766,7 @@ $\nurel\le4.2142$.  Either $F(\beta)=K$ or $F'=F(\beta)$ is a quartic field.
   field of least discriminant) and $F'=\Q(\sqrt2,\sqrt5)$ ($d_{F'}=1600$).  In both, every window element is a square,
   so nothing is forced.  $K/F'$ is then a relative quadratic, with $x_1\in F\subset F'$ and
   $\nu_{K/F'}$ bounded by Corollary~\ref{cor:relbound} ($e=2$).  Here
-  $\delta_{F'}\le1.9144$ resp.\ $2.1567$ (\file{deltaF.py}, grid step $0.1$), so
+  $\delta_{F'}\le1.9144$ resp.\ $2.1567$ (\file{deltaF.py}, see the table in \S\ref{sec:bounds}), so
   $\nu_{K/F'}\le3.886$ resp.\ $4.21$.  Before the order-level tests we apply the exact
   relative downspread test: no $\gamma\in\mathcal O_{F'}$ may give $\beta'+\gamma\succ0$ with
   $\tau(\beta'+\gamma)<\nu_{K/F'}$, for $\beta'=\pm\beta$ (\texttt{enum\_e2g8}).
@@ -808,14 +854,25 @@ quartic fields $F'$ (grid step $0.1$).
   $\delta_F$ for the four fields.
 \end{itemize}
 
-\begin{remark}[degree $9$ and beyond]
-Lemma~\ref{lem:tensor} gives $s/\gamma_s^2\ge\frac32$ for $s\le8$ ($\gamma_7^7=64$,
-$\gamma_8=2$).  So budget--cost, rigidity, the square dichotomy and
-Corollary~\ref{cor:nubound} hold for $d\le9$, and a sextic, septic or octic tensor rank never
-exceeds $8$.  In degree $9$, $\nu(K)\le(13+\sqrt{153})/4\approx6.34$.  Case B there has cubic
-subfields with relative degree $3$ (where window elements of $F$ must already be squares in
-$F$).  For Case A the rung split of \S\ref{sec:d8A} carries over unchanged.  From degree $10$
-on, the tensor floor must be re-examined ($\gamma_9$, $\gamma_{10}$).
+\begin{remark}[degree $9$]
+Lemma~\ref{lem:tensor} covers tensor rank $\le8$, so \S\S\ref{sec:tensor}--\ref{sec:bounds},
+the sharpened rigidity and the rung split hold for $d=9$, with
+$\nu(K)\le(13+\sqrt{153})/4\approx6.34$ (refined per trace class: $\nu\le6$, \file{refined\_bound.py}).
+\begin{itemize}[leftmargin=*]
+\item \emph{Case B.}  The proper subfields are cubic, $[K:F]=3$ is odd, and a window
+  non-square $\alpha$ of $F$ would give $F(\sqrt\alpha)\subseteq K$ of even degree: impossible.  The
+  degree-$3$ enumeration with NS/BC leaves $\Q(\zeta_9)^+$, excluded this way by
+  $2-\zeta_9-\zeta_9^{-1}$, and $F=\Q(\zeta_7)^+$ ($\nu=14/9$), which needs the relative cubics
+  over $F$ with $\nu_{K/F}\le4.0011$ (Corollary~\ref{cor:relbound}, $e=3$, $\delta_F\le1.5513$;
+  \file{rel9.gp}, about $3$ hours on $4$ cores).
+\item \emph{Case A.}  The split enumerator agrees with the plain one on the $60$ degree-$9$
+  subtrees with $S\le24$ (all differences reducible or certified).  But the tree grows too
+  fast: the subtree $(0,-12)$ ($S=24$) has $3.3\cdot10^5$ leaves in mode X ($20$ s), $(0,-14)$
+  does not finish in $2$ minutes, and $S$ runs up to $54$.  About $90\%$ of the leaves fail only
+  the final rung condition, which the Rolle tree cannot test earlier, and pruning with $M_8$
+  changes almost nothing.  Degree $9$ therefore needs a further theoretical restriction in
+  Case A.
+\end{itemize}
 \end{remark}
 
 \begin{thebibliography}{KY2}
