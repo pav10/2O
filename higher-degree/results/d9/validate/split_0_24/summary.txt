@@ -1,0 +1,4 @@
+subtrees 60, compared 60, timed out 0
+only-plain 395  only-split 165
+only-plain: ["reducible", 382; "sqrt-fails-budget", 13]
+only-split: Mat(["reducible", 165])

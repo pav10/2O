@@ -36,7 +36,7 @@ printf 'subF("../results/sanity_d4.txt")\nsubF(\"../results/sanity_d2.txt\")\n' 
 echo "== Case B, F = Q(sqrt5): intermediate quartic fields F' (relative quadratics beta)"
 echo 'L = enum_q2(); for (i = 1, #L, print(L[i], "  d=", nfdisc(L[i]), "  ", forceup(L[i], 5/4, 8)))' \
   | $GP sqforce8.gp rel8.gp
-echo "== Case B, F = Q(sqrt5): K/F' quadratic (delta_F' bounds from deltaF.py, grid 0.1)"
+echo "== Case B, F = Q(sqrt5): K/F' quadratic (delta_F' bounds from deltaF.py: F725 grid 0.05, F1600 grid 0.1)"
 mkdir -p $R/caseB_sqrt5
 rm -f $R/caseB_sqrt5/q2_rel_F725.txt $R/caseB_sqrt5/q2_rel_F1600.txt
 echo "enum_e2g8(\"F725\", y^4-y^3-3*y^2+y+1, 5/4, 1.9144, \"$R/caseB_sqrt5/q2_rel_F725.txt\")" | $GP rel8.gp &
