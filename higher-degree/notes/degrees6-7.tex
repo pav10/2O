@@ -863,12 +863,22 @@ Lemma~\ref{lem:tensor} covers tensor rank $\le8$, so \S\S\ref{sec:tensor}--\ref{
 the sharpened rigidity and the rung split hold for $d=9$, with
 $\nu(K)\le(13+\sqrt{153})/4\approx6.34$ (refined per trace class: $\nu\le6$, \file{refined\_bound.py}).
 \begin{itemize}[leftmargin=*]
-\item \emph{Case B.}  The proper subfields are cubic, $[K:F]=3$ is odd, and a window
+\item \emph{Case B (done).}  The proper subfields are cubic, $[K:F]=3$ is odd, and a window
   non-square $\alpha$ of $F$ would give $F(\sqrt\alpha)\subseteq K$ of even degree: impossible.  The
   degree-$3$ enumeration with NS/BC leaves $\Q(\zeta_9)^+$, excluded this way by
-  $2-\zeta_9-\zeta_9^{-1}$, and $F=\Q(\zeta_7)^+$ ($\nu=14/9$), which needs the relative cubics
-  over $F$ with $\nu_{K/F}\le4.0011$ (Corollary~\ref{cor:relbound}, $e=3$, $\delta_F\le1.5513$;
-  \file{rel9.gp}, about $3$ hours on $4$ cores).
+  $2-\zeta_9-\zeta_9^{-1}$, and $F=\Q(\zeta_7)^+$ ($\nu=14/9$).  Since $[K:F]=3$, $K=F(\beta)$ for a
+  $\beta$ realising $\nu_{K/F}\le4.0011$ (Corollary~\ref{cor:relbound}, $e=3$, $\delta_F\le1.5513$).
+  The relative cubics over $\mathcal O_F$ (\file{rel9.gp}, $b_1$ modulo $3\mathcal O_F$, $b_2$ in the
+  variance box, $b_3$ between the critical values at the three real places) number
+  $125\,985$.  The exact relative downspread test removes $118\,158$, and the relative
+  order-level tests NSR/BCR/RGA remove $3\,134$, leaving $380$ polynomials and $64$ distinct
+  nonic fields.  In the maximal order one fails the sharpened rigidity (RG2; (N) also fails
+  at its element), and the other $63$ fail condition (N) at an explicit element: $62$ with
+  $\tau<3$, and $x^9-4x^8-7x^7+34x^6+15x^5-85x^4-13x^3+56x^2+4x-8$
+  ($d_K=7^7\cdot461\cdot4327$) at an element of trace $27$ (\file{witness\_last\_d9.gp}).
+  \emph{So no nonic field whose shortest vector lies in a proper subfield admits a universal
+  $\Z$-form.}  (The relative-cubic candidate generation has not been cross-checked by brute
+  force, unlike the degree-$8$ relative quartics.)
 \item \emph{Case A.}  The split enumerator agrees with the plain one on the $60$ degree-$9$
   subtrees with $S\le24$ (all differences reducible or certified).  But the tree grows too
   fast: the subtree $(0,-12)$ ($S=24$) has $3.3\cdot10^5$ leaves in mode X ($20$ s), $(0,-14)$

@@ -26,3 +26,10 @@ findwitness2(P, Tmax) =
       return([P, "WITNESS", al, "Tr", trace(Mod(al, P)), "minpoly", minpoly(Mod(al, P)), "tested", n, "skipped", Vec(skipped)])));
   [P, "none below tau", Tmax, "tested", n, "skipped", Vec(skipped)];
 }
+
+\\ findwitness2 over a list of fields, part/nparts; writes [P, result] per field
+witnesslist(L, Tmax, outfile, part = 0, nparts = 1) =
+{
+  for (i = 1, #L, if ((i - 1) % nparts != part, next);
+    my(r = findwitness2(L[i], Tmax)); write(outfile, [L[i], r[2..#r]]));
+}

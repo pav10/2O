@@ -1,0 +1,18 @@
+1642759928621  [7, 7; 461, 1; 4327, 1]  subfields: [x^3 + 4*x^2 - 4*x - 8]
+76 elements with tau < 11/3
+1 Tr=15 -> holds  0ms
+2 Tr=15 -> holds  1ms
+3 Tr=15 -> holds  0ms
+4 Tr=18 -> holds  1ms
+5 Tr=18 -> holds  0ms
+6 Tr=18 -> holds  0ms
+7 Tr=21 -> holds  1ms
+8 Tr=21 -> holds  0ms
+9 Tr=21 -> holds  1ms
+10 Tr=24 -> holds  0ms
+11 Tr=24 -> holds  1ms
+12 Tr=24 -> holds  0ms
+13 Tr=27 -> FAILS (N)  1ms
+WITNESS -461/724*x^8 + 476/181*x^7 + 2819/724*x^6 - 7693/362*x^5 - 3799/724*x^4 + 34401/724*x^3 - 1495/724*x^2 - 3507/181*x + 1286/181  minpoly x^9 - 27*x^8 + 264*x^7 - 1198*x^6 + 2856*x^5 - 3738*x^4 + 2653*x^3 - 959*x^2 + 154*x - 7
+
+[exited with code 0]

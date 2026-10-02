@@ -218,6 +218,10 @@ src/certN8.gp           (N) decided at every degree-8 exclusion certificate
 src/check_q4.gp         brute-force check of the relative-quartic candidates
 src/compare_split.sh    rung split versus plain enumeration, differences certified
 validate8.sh            the degree-8 checks
+run_degree9_caseB.sh    degree 9, Case B
+src/rel9.gp             degree 9: relative cubics over a cubic field, absolute field tests
+src/run_c3_par.sh       resumable driver for the degree-9 relative cubics
+src/witness_last_d9.gp  (N) witness for the last degree-9 Case B field
 src/run_enum.sh         runs the enumerator over all (a1,a2)
 src/enum_check.gp       exact re-implementation of the enumerator, for validation
 src/lift6.gp            variance lattice of an order: nu, totally positive elements of small
@@ -234,7 +238,22 @@ results/                all outputs (status of every candidate, survivors, witne
 notes/                  LaTeX write-up
 ```
 
-## Next: degree 9
+## Degree 9 (partial)
 
-The tensor floor, the square dichotomy and the rung split all still hold (tensor rank ≤ 8).
-The new ingredient is cubic subfields with relative degree 3.
+The theory holds for d ≤ 9, since the tensor floor covers rank 8. The bound is ν ≤ 6.34, or 6
+after the integrality refinement.
+
+* **Case B is done** (`run_degree9_caseB.sh`, about 5 hours on 4 cores).
+  * The only proper subfields are cubic, and [K:F] = 3 is odd. So a window non-square of F
+    is an immediate contradiction, and this excludes ℚ(ζ₉)⁺.
+  * F = ℚ(ζ₇)⁺ (ν = 14/9) needs the relative cubics over O_F, with ν_{K/F} ≤ 4.0011.
+    There are 125,985 candidates. The exact relative downspread test removes 118,158 and the
+    order-level tests remove 3,134, leaving 380 polynomials and 64 nonic fields.
+  * One field fails sharpened rigidity, and (N) also fails at its element. The other 63
+    fail condition (N) at an explicit element (`results/d9/caseB_z7/witness_all.txt`), the
+    last one at trace 27.
+* **Case A is not done.** The split enumerator was validated against the plain one on all
+  60 subtrees with S ≤ 24. But the tree grows too fast: S = 24 takes 20 s and S = 28 takes
+  more than 2 minutes, while S goes up to 54. About 90% of the leaves fail only the final
+  rung test, which cannot be applied higher in the tree. Degree 9 needs a new theoretical
+  restriction in Case A.

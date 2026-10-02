@@ -63,3 +63,27 @@ enum_c3(nm, Fpol, nuF, dl, outfile, part = 0, nparts = 1) =
         write(outfile, [nm, rp, RO[2], res]))));
   print(nm, " part ", part, "/", nparts, ": ", ncand, " relative cubics in the boxes; ", Mat(cnt));
 }
+
+\\ absolute part of fieldtest2 (sharp.gp): BC and sharpened rigidity in the maximal order.
+\\ The relative part of fieldtest2 enumerates elements of trace < 3/2 nu_{K/F}, which is too
+\\ large in degree 9; it is applied separately to the fields surviving this test.
+fieldtestA(P) =
+{
+  my(nf = nfinit(P), Ob = ordinit(P, nf.zk), nu = onu(Ob), L);
+  L = otpos(Ob, nu);
+  if (#L, return(["BC", nu, L[1][1], oelt(Ob, L[1][2], L[1][3])]));
+  L = otpos(Ob, 3/2*nu);
+  for (i = 1, #L,
+    if (oshape2(Ob, L[i][2], L[i][3], nu) === 0,
+      return(["RG2", nu, L[i][1], oelt(Ob, L[i][2], L[i][3])])));
+  ["OK", nu];
+}
+
+\\ distinct fields (polredabs) of the order-level survivors in the given files
+c3fields(files) =
+{
+  my(F = Map());
+  for (i = 1, #files, my(L = readvec(files[i]));
+    for (j = 1, #L, my(e = L[j], res = e[#e]); if (res[1] == "OK", mapput(F, polredabs(e[#e - 1]), 1))));
+  if (#F, Mat(F)[,1], []);
+}
