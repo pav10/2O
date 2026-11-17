@@ -1,0 +1,2 @@
+1 x^4 - x^3 - 3*x^2 + x + 1 725 [4, "PASS-principal"]
+2 x^4 - x^3 - 4*x^2 + 4*x + 1 1125 [8, "PASS-principal"]

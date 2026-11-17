@@ -1,0 +1,516 @@
+\documentclass[11pt]{amsart}
+\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\frenchspacing
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\N}{N}
+\DeclareMathOperator{\Cl}{Cl}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\OKd}{\mathcal{O}_K^{\vee}}
+\newcommand{\Dif}{\mathfrak{D}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\LamK}{\Lambda_K}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\file}[1]{\texttt{#1}}
+
+\title{Siegel's formula by ideal classes and the lifting problem}
+\date{Draft notes, November 2026. Code and data: \file{higher-degree/} in \url{https://github.com/pav10/2O}}
+
+\begin{document}
+
+\begin{abstract}
+Kala and Yatsyna bounded the discriminant of a totally real field of degree $2$, $3$, $4$, $5$ or $7$
+that admits a universal quadratic form with rational integer coefficients, under the assumption
+that the codifferent is a principal ideal.  Kala and Melistas extended this to every degree up to $43$
+when, in addition, the minimal trace of a totally positive element of the codifferent is as large as
+Siegel's formula allows.  We remove the principal codifferent assumption from both results, with
+explicit bounds.  The method splits Siegel's formula for $\zeta_K(-1)$ into one identity for every
+ideal class and compares the class of the different with the classes of its divisors.  In degrees
+$2$ and $3$ the bound is small enough for a complete check, which gives a short proof that
+$\Q(\sqrt5)$ and $\Q(\zeta_7+\zeta_7^{-1})$ are the only real quadratic and cubic fields with such a
+form.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Let $K$ be a totally real number field of degree $d$, with ring of integers $\OK$, codifferent
+$\OKd=\Dif^{-1}$ and discriminant $\Delta_K$.  A \emph{universal $\Z$-form} over $K$ is a positive
+definite quadratic form with coefficients in $\Z$ that represents every totally positive element of
+$\OK$.  The lifting problem asks for the fields that admit one.  Kala and Yatsyna conjectured that
+these are $\Q$, $\Q(\sqrt5)$ and $\Q(\zeta_7+\zeta_7^{-1})$ \cite{KY1}.  The conjecture is known in
+degrees at most $5$ \cite{KY2} and, by the computer-assisted notes in this folder, in degrees $6$,
+$7$ and $8$.
+
+For $\ell\ge1$ let
+\[
+  T_\ell=\{\nu\in\OKd : \nu\succ0,\ \Tr\nu=\ell\},\qquad m(K)=\min\{\ell : T_\ell\ne\emptyset\},
+\]
+and let $r_d=\dim M_{2d}(\mathrm{SL}_2(\Z))$.  Siegel's formula \cite{Si} writes $\zeta_K(-1)$ as a
+linear combination of the sums $\sum_{\nu\in T_\ell}\sigma(\nu\Dif)$, $\ell\le r_d$, where
+$\sigma(\mathfrak a)=\sum_{\mathfrak b\mid\mathfrak a}\N\mathfrak b$.  Kala and Yatsyna
+\cite[Theorem~1.2]{KY1} observed that a universal $\Z$-form forces the totally positive elements of
+$\OK$ that minimize $\Tr(\delta\,\cdot)$ to be units (via Kitaoka's theory of lattices of E-type), and
+deduced that if $d\in\{2,3,4,5,7\}$ (exactly the degrees with $r_d=1$) and $\OKd$ is principal, then
+$|\Delta_K|$ is bounded.  Kala and Melistas \cite[Theorem~2.4]{KM} proved the analogous bound for
+$d\le43$ when $\OKd$ is principal and $m(K)=r_d$.  In both results principality makes $\nu\Dif$
+principal for $\nu\in T_{m(K)}$, so that the minimizing property gives $\sigma(\nu\Dif)=1$ and bounds
+$\#T_{m(K)}$ by a number of units.  Kim and Lee \cite{KL} solved the cubic case without this assumption by a
+different method, and Kala and Melistas \cite[\S3]{KM} proposed to replace $\OKd$ by a sum of few
+principal pieces.
+
+We will keep $\nu\Dif$ non-principal and split Siegel's formula instead.  The universal $\Z$-form
+enters only through the following property of the trace-minimal elements of the codifferent:
+\begin{equation}\label{eq:condP}
+  \text{for every }\nu\in T_{m(K)},\ \text{the only principal ideal dividing }\nu\Dif\text{ is }\OK.
+\end{equation}
+Lemma~\ref{lem:etype} shows that \eqref{eq:condP} holds when $d\le43$ and $K$ admits a universal
+$\Z$-form.
+
+\begin{theorem}\label{thm:main}
+Let $K$ be a totally real field of degree $d\ge2$ with $m(K)=r_d$ that satisfies \eqref{eq:condP}.
+Let $A_d$, $c_d$, $G_d$ be the constants of \eqref{eq:Ad}, Lemma~\textup{\ref{lem:count}} and
+Lemma~\textup{\ref{lem:small}}.  Then:
+\begin{enumerate}[label=\textup{(\arabic*)}]
+\item\label{it:class} every integral ideal in the class of $\Dif$ has norm at least
+  $(|\Delta_K|/(A_dc_d))^{1/2}$;
+\item\label{it:disc} $|\Delta_K|\le(A_dc_dG_d^2)^{d-1}$;
+\item\label{it:reg} the regulator satisfies $R_K\le\gamma_d^d A_dc_d/2^{d-2}$, where $\gamma_d$ is
+  Hermite's constant.
+\end{enumerate}
+\end{theorem}
+
+The condition $m(K)=r_d$ holds for every field of degree $2$, $3$, $4$, $5$ and $7$, since $r_d=1$
+there and $m(K)\le r_d$ by Siegel's formula.  For $d=2$ and $d=3$ the bound in
+\ref{it:disc} is $13$ and $3621$, and a complete check of these fields gives the following.
+
+\begin{corollary}\label{cor:cubic}
+The only real quadratic field that satisfies \eqref{eq:condP} is $\Q(\sqrt5)$, and the only totally
+real cubic field that satisfies it is $\Q(\zeta_7+\zeta_7^{-1})$.  In particular these are the only real quadratic and
+cubic fields with a universal $\Z$-form.
+\end{corollary}
+
+The second sentence was proved by Kala and Yatsyna in the quadratic case \cite[Theorem~1.1]{KY1}
+and by Kim and Lee in the cubic case \cite[Theorem~1.3]{KL}.
+
+The proof of Theorem~\ref{thm:main} will use three ingredients.  The first is Siegel's formula split
+by ideal classes (Proposition~\ref{prop:siegel}).  It shows that \eqref{eq:condP} is equivalent to
+an identity between $\#T_{r_d}$ and the partial zeta value $\zeta(2;[\Dif])$ of the class of the
+different (Proposition~\ref{prop:identity}).  The second is a lattice-point bound
+$\#T_{r_d}\ll|\Delta_K|^{1/2}$ (Lemma~\ref{lem:count}).  Together they say that $[\Dif]$ contains no
+ideal of norm much smaller than $|\Delta_K|^{1/2}$.  The third ingredient contradicts this for large
+$|\Delta_K|$: a shortest nonzero element $\xi$ of trace zero in $\OKd$ gives the integral ideal
+$\xi\Dif\in[\Dif]$ of norm $O(|\Delta_K|^{(d-2)/(2d-2)})$ (Lemma~\ref{lem:small}).  So the lifting
+problem in these degrees reduces to estimates for one partial zeta value.
+
+The explicit bounds grow quickly with $d$ (Table~\ref{tab:bounds}), so only degrees $2$ and $3$ are
+settled by a direct check.  In degrees $d\ge6$ with $m(K)<r_d$ the formula also contains the sums
+over $T_\ell$ for $m(K)<\ell\le r_d$, which the minimizing property does not control.  This, not the
+principality of the codifferent, is what remains.  We discuss it in Section~\ref{sec:higher}.
+
+\section{Siegel's formula by ideal classes}\label{sec:siegel}
+
+Throughout, $K$ is totally real of degree $d\ge2$, and we identify $K$ with its image in $\R^d$
+under the real embeddings $\sigma_1,\dots,\sigma_d$.  Then the trace form is the standard inner
+product, $\OKd$ is the dual lattice of $\OK$, and $\Dif=(\OKd)^{-1}$ has norm $|\Delta_K|$.  For
+$\nu\in\OKd\setminus\{0\}$ the ideal $\nu\Dif$ is integral and lies in the class $[\Dif]$.  Let $U$ be
+the unit group, $U^+$ its totally positive part, $\Cl$ the (wide) ideal class group, and for a class
+$C$ put
+\[
+  \zeta(s;C)=\sum_{\mathfrak b\subseteq\OK,\ [\mathfrak b]=C}\N\mathfrak b^{-s}\quad(s>1),\qquad
+  a_C(\nu)=\sum_{\mathfrak b\mid\nu\Dif,\ [\mathfrak b]=C}\N\mathfrak b .
+\]
+Let $b_1(2d),\dots,b_{r_d}(2d)$ be the rational numbers with $a_0(f)=\sum_{\ell=1}^{r_d}b_\ell(2d)a_\ell(f)$
+for every $f=\sum_{n\ge0}a_n(f)q^n$ in $M_{2d}(\mathrm{SL}_2(\Z))$, see \cite{Si} or
+\cite[Theorem~2.2]{KM}.
+
+\begin{proposition}\label{prop:siegel}
+For every class $C\in\Cl$,
+\begin{equation}\label{eq:siegelC}
+  \sum_{\ell=1}^{r_d}b_\ell(2d)\sum_{\nu\in T_\ell}a_C(\nu)
+  =(-1)^d\,\frac{|\Delta_K|^{3/2}}{(4\pi^2)^d}\,\zeta\bigl(2;C^{-1}[\Dif]\bigr).
+\end{equation}
+\end{proposition}
+
+Summing \eqref{eq:siegelC} over $C$ and using the functional equation
+$\zeta_K(-1)=(-1)^d|\Delta_K|^{3/2}\zeta_K(2)/(2\pi^2)^d$ gives Siegel's formula
+$\zeta_K(-1)=2^d\sum_\ell b_\ell(2d)\sum_{\nu\in T_\ell}\sigma(\nu\Dif)$.  We have not found the class
+version in the literature.  We checked it numerically in degrees $3$, $4$ and $6$
+(Section~\ref{sec:computations}).
+
+\begin{proof}
+For a fractional ideal $\mathfrak a$, an even integer $k\ge2$ and $z\in\mathcal H^d$ put
+\[
+  G_{\mathfrak a}(z)=\sum_{(c,e)\in(\mathfrak a\times\mathfrak a\setminus\{0\})/U}\N(cz+e)^{-k},
+  \qquad \N(cz+e)=\prod_{i=1}^d\bigl(\sigma_i(c)z_i+\sigma_i(e)\bigr),
+\]
+where $U$ acts diagonally.  For $k=2$ the series is defined by Hecke's limiting process, exactly as
+for Siegel's formula.  Since $d\ge2$, the limit is holomorphic and the computation below is unchanged.
+The group $\mathrm{SL}_2(\OK)$ permutes $\mathfrak a\times\mathfrak a$, so $G_{\mathfrak a}$ is a
+Hilbert modular form of parallel weight $k$ for $\mathrm{SL}_2(\OK)$, and its restriction to the
+diagonal $z_1=\dots=z_d=\tau$ lies in $M_{kd}(\mathrm{SL}_2(\Z))$.
+
+We compute the Fourier expansion.  The pairs with $c=0$ contribute
+$\sum_{e\in(\mathfrak a\setminus0)/U}\N(e)^{-k}=\N\mathfrak a^{-k}\zeta(k;[\mathfrak a]^{-1})$.
+For $c\ne0$ we use the Lipschitz formula (Poisson summation over $\OK$)
+\[
+  \sum_{\mu\in\OK}\N(z+\mu)^{-k}=\kappa_k|\Delta_K|^{-1/2}\sum_{\nu\in\OKd,\ \nu\succ0}\N(\nu)^{k-1}e^{2\pi i\Tr(\nu z)},
+  \qquad \kappa_k=\Bigl(\frac{(-2\pi i)^k}{(k-1)!}\Bigr)^{d}.
+\]
+Writing $e=e_0+c\mu$ with $e_0$ in a set of representatives of $\mathfrak a/c\OK$ and $\mu\in\OK$, we
+get
+\[
+  \sum_{e\in\mathfrak a}\N(cz+e)^{-k}=\N(c)^{-k}\kappa_k|\Delta_K|^{-1/2}\sum_{\nu\succ0}\N(\nu)^{k-1}e^{2\pi i\Tr(\nu z)}
+  \sum_{e_0}e^{2\pi i\Tr(\nu e_0/c)} .
+\]
+The inner sum is $[\mathfrak a:c\OK]=|\N(c)|/\N\mathfrak a$ if $\nu/c\in(\mathfrak a\Dif)^{-1}$, and $0$
+otherwise.  The condition says that the integral ideal $\mathfrak b=c\mathfrak a^{-1}$ divides
+$\nu\Dif$, and as $c$ runs over $(\mathfrak a\setminus0)/U$ the ideal $\mathfrak b$ runs over the
+integral ideals of the class $[\mathfrak a]^{-1}$, with $|\N(c)|=\N\mathfrak b\,\N\mathfrak a$.
+Replacing $\mathfrak b$ by $\nu\Dif\mathfrak b^{-1}$ and using $\N(\nu\Dif)=\N(\nu)|\Delta_K|$, we
+obtain
+\[
+  \N\mathfrak a^{k}\,G_{\mathfrak a}(\tau,\dots,\tau)
+  =\zeta\bigl(k;[\mathfrak a]^{-1}\bigr)+\kappa_k|\Delta_K|^{1/2-k}\sum_{\ell\ge1}
+  \Bigl(\sum_{\nu\in T_\ell}\ \sum_{\mathfrak b\mid\nu\Dif,\ [\mathfrak b]=[\mathfrak a\Dif]}\N\mathfrak b^{k-1}\Bigr)q^\ell .
+\]
+Take $k=2$, choose $\mathfrak a$ with $[\mathfrak a\Dif]=C$, so that $[\mathfrak a]^{-1}=C^{-1}[\Dif]$,
+and apply $a_0=\sum_\ell b_\ell(2d)a_\ell$.  Since $\kappa_2=(-4\pi^2)^d$, this is \eqref{eq:siegelC}.
+\end{proof}
+
+Since $\zeta(2;C)>0$ for every class $C$, \eqref{eq:siegelC} shows that $T_\ell\ne\emptyset$ for some
+$\ell\le r_d$, that is, $m(K)\le r_d$.
+
+\section{The trace-minimal elements of the codifferent}\label{sec:etype}
+
+\begin{lemma}\label{lem:etype}
+Assume that $d\le43$ and that $K$ admits a universal $\Z$-form.  Then $K$ satisfies
+\eqref{eq:condP}.
+\end{lemma}
+
+\begin{proof}
+Let $\nu\in T_{m(K)}$ and let $\alpha\in\OK$ be such that $(\alpha)$ divides $\nu\Dif$.  By
+\cite[Corollary~4.5]{KY1} there is a unit of every signature, so we may assume $\alpha\succ0$.  Then
+$\delta=\nu/\alpha$ lies in $\OKd$ and is totally positive.  For every totally positive
+$\beta\in\OK$ the element $\delta\beta$ lies in $T_\ell$ for some $\ell$, so
+$\Tr(\delta\beta)\ge m(K)=\Tr(\delta\alpha)$.  By \cite[Lemma~4.6]{KY1}, $\alpha$ is a unit.
+\end{proof}
+
+Both results of \cite{KY1} that we used rest on Kitaoka's theorem that the trace form
+$x\mapsto\Tr(\delta x^2)$ on $\OK$, which has rank $d\le43$, is of E-type \cite[Theorem~4.2]{KY1}.
+
+\begin{proposition}\label{prop:identity}
+Assume that $m(K)=r_d$ and put
+\begin{equation}\label{eq:Ad}
+  A_d=(4\pi^2)^d\,|b_{r_d}(2d)| ,\qquad\text{so that } A_d=(2d-1)!\,\zeta(2d)\ \text{if } r_d=1 .
+\end{equation}
+Then $\#T_{r_d}\le|\Delta_K|^{3/2}\zeta(2;[\Dif])/A_d$, with equality if and only if $K$ satisfies
+\eqref{eq:condP}.  If $K$ satisfies \eqref{eq:condP}, then also
+\[
+  \sum_{\nu\in T_{r_d}}\N(\nu)=\frac{|\Delta_K|^{1/2}\,\zeta(2;[\OK])}{A_d}.
+\]
+\end{proposition}
+
+\begin{proof}
+Only $\ell=r_d$ occurs in \eqref{eq:siegelC}.  For $C=[\OK]$ we have $a_C(\nu)\ge1$ (the divisor
+$\OK$), with equality for all $\nu\in T_{r_d}$ exactly when \eqref{eq:condP} holds.  Since
+$T_{r_d}\ne\emptyset$ and $\zeta(2;[\Dif])>0$, \eqref{eq:siegelC} shows that $(-1)^db_{r_d}(2d)>0$,
+and the first claim follows.  For $C=[\Dif]$ the map
+$\mathfrak b\mapsto\nu\Dif\mathfrak b^{-1}$ is a bijection from the divisors of $\nu\Dif$ in $[\Dif]$
+onto its principal divisors.  Under \eqref{eq:condP} the only such divisor is $\nu\Dif$ itself, so
+$a_{[\Dif]}(\nu)=\N(\nu)|\Delta_K|$.  The formula for $A_d$ when $r_d=1$ follows from
+$b_1(2d)=-B_{2d}/(4d)$ and Euler's formula for $\zeta(2d)$.
+\end{proof}
+
+If $\OKd$ is principal, then $\zeta(2;[\Dif])=\zeta(2;[\OK])\ge1$ and \eqref{eq:condP} forces
+$T_{r_d}\subseteq\delta_0U^+$ for a generator $\delta_0$; this is the situation of
+\cite{KY1,KM}.  In general $[\Dif]$ is the square of a class by Hecke's theorem (see \cite{Ar} and
+\cite[Remark~1.2]{KL}), so $\OKd$ is principal whenever $\Cl$ is an elementary abelian $2$-group.
+
+\section{Three estimates}\label{sec:estimates}
+
+Let $H=\{y\in\R^d:\sum_iy_i=0\}$, let $\pi$ be the orthogonal projection onto $H$, and put
+\[
+  L_K=\OKd\cap H,\qquad \LamK=\pi(\OK).
+\]
+Here $|\pi(x)|^2=d\Var(x)$ with $\Var(x)=\Tr(x^2)/d-(\Tr(x)/d)^2$, and $\pi(x)=0$ exactly when
+$x\in\Z$, so $\LamK$ is the variance lattice $\OK/\Z$ of the degree-$6$ and $7$ notes.  Since
+$1$ extends to a $\Z$-basis of $\OK$, the trace maps $\OKd$ onto $\Z$, and its level sets are
+$1/\sqrt d$ apart.  Hence $L_K$ is a lattice of rank $d-1$ in $H$ with covolume
+$\sqrt d\,|\Delta_K|^{-1/2}$, and its dual lattice in $H$ is $\LamK$.
+
+\begin{lemma}\label{lem:small}
+Let
+\[
+  \eta_d=\max\Bigl\{\prod_{i=1}^d|y_i| : y\in H,\ |y|=1\Bigr\},\qquad
+  G_d=\eta_d\bigl(\gamma_{d-1}d^{1/(d-1)}\bigr)^{d/2}.
+\]
+There is a nonzero $\xi\in L_K$ with $\N(\xi\Dif)\le G_d\,|\Delta_K|^{(d-2)/(2d-2)}$.  In particular
+the class $[\Dif]$ contains an integral ideal of at most this norm.
+\end{lemma}
+
+\begin{proof}
+By the definition of Hermite's constant there is a nonzero $\xi\in L_K$ with
+$|\xi|^2\le\gamma_{d-1}(\sqrt d\,|\Delta_K|^{-1/2})^{2/(d-1)}$.  Then
+$|\N(\xi)|\le\eta_d|\xi|^d$, and $\N(\xi\Dif)=|\N(\xi)|\,|\Delta_K|$.
+\end{proof}
+
+By Lagrange multipliers a maximizing $y$ takes two values, $d-k$ on $k$ coordinates and $-k$ on the
+others (up to scaling), so $\eta_d=\max_{1\le k<d}(d-k)^kk^{d-k}/(dk(d-k))^{d/2}$.  For even $d$ this
+is $d^{-d/2}$; for $d=3$ it is $1/(3\sqrt6)$.
+
+\begin{lemma}\label{lem:count}
+For $\ell\ge1$ we have $\#T_\ell\le c_{d,\ell}|\Delta_K|^{1/2}$, where
+\[
+  c_{d,\ell}=d^{-1/2}\Bigl(\frac{2\pi e\ell^2}{d}\Bigr)^{(d-1)/2}(1+\varepsilon_{d,\ell}),\qquad
+  \varepsilon_{d,\ell}=a\int_{1/3}^\infty e^{-aV}\bigl((1+2\sqrt{3V})^{d-1}-1\bigr)\,dV,\quad a=2\pi^2\ell^2 .
+\]
+We write $c_d=c_{d,r_d}$.
+\end{lemma}
+
+\begin{proof}
+Every $y\in\R^d$ with positive coordinates and $\sum_iy_i=\ell$ satisfies
+$|y-\tfrac{\ell}{d}\one|^2=|y|^2-\ell^2/d\le\ell^2(d-1)/d$.  The elements of $\OKd$ of trace $\ell$ form
+a translate $\tfrac{\ell}{d}\one+w_0+L_K$ with $w_0\in H$.  Hence, for every $t>0$,
+\[
+  \#T_\ell\le\sum_{w\in w_0+L_K}e^{\pi t(\ell^2(d-1)/d-|w|^2)}
+  \le e^{\pi t\ell^2(d-1)/d}\,\frac{t^{-(d-1)/2}}{\sqrt d\,|\Delta_K|^{-1/2}}\sum_{\lambda\in\LamK}e^{-\pi|\lambda|^2/t},
+\]
+by Poisson summation over $L_K$, whose dual is $\LamK$.  We take $t=d/(2\pi\ell^2)$.  Then the first two
+factors give $d^{-1/2}(2\pi e\ell^2/d)^{(d-1)/2}|\Delta_K|^{1/2}$, and the last sum is
+$\sum_{x\in\OK/\Z}e^{-a\Var(x)}$.
+
+We claim that $\Var(x)\ge1/3$ for $x\in\OK\setminus\Z$.  Let $x_1,\dots,x_n$ be the conjugates of
+$x$, where $n=[\Q(x):\Q]\ge2$; each is taken by $d/n$ embeddings, so
+$\Var(x)=n^{-2}\sum_{i<j}(x_i-x_j)^2$.  If $n=2$, then $(x_1-x_2)^2$ is the discriminant of a totally
+real quadratic integer, so it is at least $5$.  If $n\ge3$, then the product of the $(x_i-x_j)^2$ is
+a nonzero integer, and the inequality of arithmetic and geometric means gives
+$\sum_{i<j}(x_i-x_j)^2\ge\binom n2$, so $\Var(x)\ge(n-1)/(2n)\ge1/3$.
+
+Consequently the points of $\LamK$ are at distance at least $\sqrt{d/3}$ from each other, and a
+packing argument gives $N(V)\le(1+2\sqrt{3V})^{d-1}$ for the number $N(V)$ of $x\in\OK/\Z$ with
+$\Var(x)\le V$.  Integrating by parts,
+$\sum_{x\ne0}e^{-a\Var(x)}=a\int_{1/3}^\infty e^{-aV}(N(V)-1)\,dV\le\varepsilon_{d,\ell}$.
+\end{proof}
+
+In the fields we computed, $\#T_1$ is close to $|\Delta_K|^{1/2}/(d-1)!$ (Section~\ref{sec:computations}),
+so $c_{d,1}$ exceeds the truth by a factor of about $c_{d,1}(d-1)!$, that is, $7$ for $d=3$ and $28$
+for $d=4$.
+
+\begin{lemma}\label{lem:reg}
+For every class $C\in\Cl$ we have $\zeta(2;C)\ge2^{d-2}R_K/(\gamma_d^d|\Delta_K|)$.
+\end{lemma}
+
+\begin{proof}
+Fix a fractional ideal $\mathfrak f\in C^{-1}$.  The integral ideals in $C$ are the ideals
+$\xi\mathfrak f^{-1}$ with $\xi\in(\mathfrak f\setminus0)/U$, so after scaling $\mathfrak f$ to a
+lattice $\Lambda\subset\R^d$ of covolume $1$ we get $\zeta(2;C)=Z/|\Delta_K|$, where
+$Z=\sum_{x\in(\Lambda\setminus0)/U}|\N(x)|^{-2}$.  We will show that $Z\ge2^{d-2}R_K/\gamma_d^d$ by
+averaging over the orbit of $\Lambda$ under the diagonal group.
+
+For $t\in H$ let $e^t$ act on $\R^d$ by $(e^{t_1},\dots,e^{t_d})$, and for $x$ with $\N(x)\ne0$ let
+$\lambda(x)\in H$ have coordinates $\log|x_i|-\frac1d\log|\N(x)|$.  Then $\N(e^tx)=\N(x)$ and
+$\lambda(e^tx)=\lambda(x)+t$.  Let $k(\lambda)=e^{-2dM(\lambda)}/Z_k$ on $H$, where
+$M(\lambda)=\max_i\lambda_i\ge0$ and $Z_k=\int_He^{-2dM}$; the set $\{M\le s\}$ is a regular simplex of
+volume $d^{d-1/2}s^{d-1}/(d-1)!$, so $Z_k=\sqrt d/2^{d-1}$.  Put $\varphi(x)=|\N(x)|^{-2}k(\lambda(x))$.
+Then $\int_H\varphi(e^tx)\,dt=|\N(x)|^{-2}$.
+
+For $u\in U^+$, multiplication by $u$ maps $\Lambda$ onto itself and equals $e^{\log u}$, where
+$\log u=(\log\sigma_i(u))_i\in H$.  These vectors form a lattice $\log U^+$ in $H$ of covolume
+$\sqrt d\,R_K[U:\pm U^+]$, and $U^+$ acts freely on $\Lambda\setminus0$.  For a fundamental domain $F$
+of $\log U^+$, unfolding gives
+\[
+  \int_F\sum_{x\in\Lambda\setminus0}\varphi(e^tx)\,dt=\sum_{x\in(\Lambda\setminus0)/U^+}|\N(x)|^{-2}=[U:U^+]\,Z .
+\]
+For every $t$ the unimodular lattice $e^t\Lambda$ contains a nonzero $v$ with $|v|^2\le\gamma_d$.
+Writing $|v_i|=|\N(v)|^{1/d}e^{\lambda_i}$ we get $|\N(v)|^{-2}\ge(\sum_ie^{2\lambda_i}/\gamma_d)^d\ge e^{2dM(\lambda)}/\gamma_d^d$,
+hence $\varphi(v)\ge1/(\gamma_d^dZ_k)=2^{d-1}/(\sqrt d\,\gamma_d^d)$.  So the integrand is at least this
+number, and $[U:U^+]=2[U:\pm U^+]$ gives $Z\ge2^{d-2}R_K/\gamma_d^d$.
+\end{proof}
+
+\section{Proof of Theorem \ref{thm:main}}\label{sec:proof}
+
+By Proposition~\ref{prop:identity} and Lemma~\ref{lem:count},
+\begin{equation}\label{eq:key}
+  \zeta(2;[\Dif])=\frac{A_d\,\#T_{r_d}}{|\Delta_K|^{3/2}}\le\frac{A_dc_d}{|\Delta_K|} .
+\end{equation}
+An integral ideal $\mathfrak b\in[\Dif]$ contributes $\N\mathfrak b^{-2}$ to $\zeta(2;[\Dif])$, which
+proves \ref{it:class}.  Lemma~\ref{lem:small} and \ref{it:class} give
+$(|\Delta_K|/(A_dc_d))^{1/2}\le G_d|\Delta_K|^{(d-2)/(2d-2)}$, that is,
+$|\Delta_K|^{1/(2d-2)}\le(A_dc_d)^{1/2}G_d$, which is \ref{it:disc}.  Lemma~\ref{lem:reg} with
+$C=[\Dif]$ and \eqref{eq:key} give \ref{it:reg}.\qed
+
+\medskip
+Table~\ref{tab:bounds} lists the constants, computed with PARI/GP (Section~\ref{sec:computations}),
+using the known values of $\gamma_n$ for $n\le8$ \cite{CS} and Blichfeldt's bound
+$\gamma_n\le\frac2\pi\Gamma(2+\frac n2)^{2/n}$ \cite{Bl} for $n\ge9$.  For $d\ge6$ the table assumes
+$m(K)=r_d$.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrr}
+\toprule
+$d$ & $r_d$ & $A_d$ & $c_d$ & $G_d$ & bound \ref{it:disc} for $|\Delta_K|$ & bound \ref{it:reg} for $R_K$ \\
+\midrule
+2 & 1 & 6.494 & 2.073 & 1 & 13 & 18 \\
+3 & 1 & 122.1 & 3.328 & 0.3849 & 3621 & 407 \\
+4 & 1 & $5.061\cdot10^{3}$ & 4.597 & 0.25 & $3.1\cdot10^{9}$ & $2.3\cdot10^{4}$ \\
+5 & 1 & $3.632\cdot10^{5}$ & 5.926 & 0.09499 & $1.4\cdot10^{17}$ & $2.2\cdot10^{6}$ \\
+6 & 2 & $1.926\cdot10^{4}$ & 178.6 & 0.04724 & $2.7\cdot10^{19}$ & $4.6\cdot10^{6}$ \\
+7 & 1 & $6.227\cdot10^{9}$ & 13.04 & 0.01770 & $2.7\cdot10^{44}$ & $1.6\cdot10^{11}$ \\
+43 & 7 & $4.134\cdot10^{56}$ & $1.805\cdot10^{26}$ & $1.10\cdot10^{-17}$ & $10^{2056.2}$ & $3.6\cdot10^{105}$ \\
+\bottomrule
+\end{tabular}
+\caption{Constants of Theorem \ref{thm:main}, to four significant digits; the discriminant bounds for
+$d\le3$ are rounded down to integers, all other bounds are rounded up.
+The file \file{results/etype/constants.txt} has all $d\le43$.}
+\label{tab:bounds}
+\end{table}
+
+\begin{proof}[Proof of Corollary $\ref{cor:cubic}$]
+For $d=2$ the bound is $|\Delta_K|\le13$.  The fields of discriminant $8$, $12$ and $13$ violate
+\eqref{eq:condP}: in each we found $\nu\in T_1$ and a non-unit $\alpha\in\OK$ with
+$\nu/\alpha\in\OKd$, and checked these three properties in exact arithmetic.  For $d=3$ the bound is
+$|\Delta_K|\le3621$.  There are $122$ totally real cubic fields in this range (we compared the LMFDB
+list \cite{LMFDB} with PARI's \file{nflist}).  For each of them except $\Q(\zeta_7+\zeta_7^{-1})$ we
+found such a certificate $(\nu,\alpha)$, again checked exactly.  Finally, $\Q(\sqrt5)$ and
+$\Q(\zeta_7+\zeta_7^{-1})$ satisfy \eqref{eq:condP} by Lemma~\ref{lem:etype}, since they admit
+universal $\Z$-forms: $x^2+y^2+z^2$ over $\Q(\sqrt5)$ \cite{Ma} and $x^2+y^2+z^2+w^2+xy+xz+xw$ over
+$\Q(\zeta_7+\zeta_7^{-1})$ \cite[Theorem~1.2]{KY1}.  The last sentence of the corollary follows from
+Lemma~\ref{lem:etype}.
+\end{proof}
+
+\section{Computations}\label{sec:computations}
+
+All computations used PARI/GP 2.15.4 and the scripts \file{src/etype\_zeta.gp},
+\file{src/etype\_zeta\_checks.gp}, \file{src/etype\_zeta\_checks6.gp} and \file{src/etype\_census.sh};
+the outputs are in \file{results/etype/}.  The sets $T_\ell$ were enumerated in floating point
+(\file{qfminim} on the trace form of $\OKd$, with a margin of $10^{-9}$), and every element found was
+then checked exactly.  Class groups come from \file{bnfinit} and are therefore conditional on GRH,
+except where a statement is checked by an explicit certificate.
+
+\medskip\noindent\emph{Proposition $\ref{prop:siegel}$.}  For the cubic fields $x^3-21x-28$,
+$x^3-x^2-16x+8$ (both with $\Cl\cong\Z/3$ and non-principal $\Dif$) and $x^3-x^2-9x+8$ ($\Cl\cong\Z/3$,
+principal $\Dif$), for the quartic field $x^4-x^3-19x^2+4x+76$ ($\Cl\cong\Z/2$), and for the sextic
+field $x^6-x^5-6x^4+6x^3+8x^2-8x+1$ (class number $1$, $r_6=2$, so $T_2$ enters), the two sides of
+\eqref{eq:siegelC} agree for every class to within $10^{-36}$.  The right side was computed from the
+values $L(2,\chi)$ of the class group characters (\file{lfun}), the left side exactly.  For the
+sextic field $x^6-x^5-18x^4+17x^3+58x^2-16x-1$ ($|\Delta_K|=46{,}411{,}625$, $\Cl\cong\Z/2$, principal
+$\Dif$) they agree to within $10^{-32}$.
+
+\medskip\noindent\emph{Condition \eqref{eq:condP} on field lists.}  We tested \eqref{eq:condP} with
+$m(K)=1$ on the LMFDB lists of totally real fields \cite{LMFDB}: the first $40{,}000$ cubic fields
+($|\Delta_K|\le741{,}448$), all $13{,}073$ quartic fields with $|\Delta_K|\le10^6$ and all $9{,}494$
+quintic fields with $|\Delta_K|\le10^7$.  The fields satisfying \eqref{eq:condP} are exactly those of
+discriminant $49$ (cubic), $725$ and $1125$ (quartic) and $14641$ (quintic), all with class number $1$.
+Separately, among all $193{,}467$ cubic fields with $|\Delta_K|\le3{,}374{,}997$, the $9{,}859$
+fields with non-principal $\Dif$ all violate \eqref{eq:condP}; on average $16.5\%$ of the elements
+$\nu\in T_1$ have no principal divisor of $\nu\Dif$ other than $\OK$, but never all of them.  The same
+holds for the $19$ quartic fields with non-principal $\Dif$; no quintic field in the list has one.
+
+\medskip\noindent\emph{The estimates.}  In each of the ten fields of \file{results/etype/estimates.txt}, the element $\xi$ of
+Lemma~\ref{lem:small} gives $\N(\xi\Dif)\le6$, far below $G_d|\Delta_K|^{(d-2)/(2d-2)}$; for instance
+$\N(\xi\Dif)=6$ for $x^3-435x-2774$, where $|\Delta_K|=3{,}374{,}568$.  The numbers $\#T_1$ are close
+to $|\Delta_K|^{1/2}/(d-1)!$ (for that field $\#T_1=919$ against $918.5$).  The smallest partial value
+$\min_C\zeta(2;C)$ exceeded the bound of Lemma~\ref{lem:reg} by factors between $23$ and $9177$.  So
+\ref{it:class} of Theorem~\ref{thm:main} fails by a wide margin in practice, and the size of the
+bounds in Table~\ref{tab:bounds} comes from the uniform estimates, not from the method.
+
+\section{Higher degrees}\label{sec:higher}
+
+If $m(K)<r_d$, then \eqref{eq:siegelC} with $C=[\OK]$ reads
+\begin{equation}\label{eq:general}
+  \sum_{\ell=m(K)}^{r_d}b_\ell(2d)\,S_\ell=(-1)^d\frac{|\Delta_K|^{3/2}}{(4\pi^2)^d}\zeta(2;[\Dif]),
+  \qquad S_\ell=\sum_{\nu\in T_\ell}\ \sum_{(\alpha)\mid\nu\Dif}\N(\alpha),
+\end{equation}
+and \eqref{eq:condP} gives $S_{m(K)}=\#T_{m(K)}$.  By Lemma~\ref{lem:small} the right side has
+absolute value at least
+\[
+  \frac{|\Delta_K|^{1/2+1/(d-1)}}{(4\pi^2)^dG_d^2}.
+\]
+The signs of $(-1)^db_\ell(2d)$
+for $d\le43$ (\file{results/etype/checks.txt}) are all positive for odd $d$ and for $d=6$; for even
+$d\ge8$ they are negative for the smaller $\ell$ and positive for the last one or two.  Since
+$S_{m(K)}=\#T_{m(K)}\le c_{d,m(K)}|\Delta_K|^{1/2}$, the argument of Section~\ref{sec:proof} gives an
+explicit bound for $|\Delta_K|$ as soon as there are $\epsilon>0$ and $B$, depending only on $d$, with
+\[
+  \sum_{m(K)<\ell\le r_d,\ (-1)^db_\ell(2d)>0}|b_\ell(2d)|\,S_\ell\le B\,|\Delta_K|^{1/2+1/(d-1)-\epsilon}.
+\]
+Here $S_\ell$ counts pairs $(\delta,\alpha)$, up to $U^+$, with $\delta\in\OKd$ and $\alpha\in\OK$
+totally positive, $\Tr(\delta\alpha)=\ell$, weighted by $\N(\alpha)$.  The minimizing property of
+\cite[Lemma~4.6]{KY1} controls only the pairs with $\Tr(\delta\alpha)$ minimal for $\delta$.  When
+$\OKd=\delta_0\OK$, the pairs with $\delta=\delta_0$ already give $S_2\ge\sum\N(\alpha)$ over the
+totally positive $\alpha$ with $\Tr(\delta_0\alpha)=2$.  Heuristically there are about
+$|\Delta_K|^{1/2}$ such $\alpha$, with norms up to $(2/d)^d|\Delta_K|$, so this sum is of order
+$|\Delta_K|^{3/2}$.  The obstacle is therefore present also for principal codifferent, and it is the
+reason for the hypothesis $m(K)=r_d$ in \cite[Theorem~2.4]{KM}.
+
+What is needed is a description of the elements of $\OK$ in the shells
+$\Tr(\delta\alpha)\le r_d\le8$ above the minimum.  For a universal $\Z$-form $Q$ these elements are
+the values $Q(v)$ at the vectors $v$ of the tensor product of $Q$ with the trace form
+$x\mapsto\Tr(\delta x^2)$ on $\OK$ whose norm is at most $r_d$ times the minimum.  Splitting of vectors of norm below twice
+the minimum fails in general: in $A_2\otimes A_2$ the vector $x_1\otimes y_1+x_2\otimes y_2$ with
+$\langle x_1,x_2\rangle=-1$, $\langle y_1,y_2\rangle=1$ has norm $6$, below $2\min(A_2\otimes A_2)=8$.
+A replacement would have to use the universality of $Q$ (every element of the shell is represented)
+and not only the E-type property.
+
+\begin{thebibliography}{LMFDB}
+
+\bibitem[Ar]{Ar}
+J.~V. Armitage, On a theorem of Hecke in number fields and function fields,
+Invent. Math. 2 (1967), 238--246.
+
+\bibitem[Bl]{Bl}
+H.~F. Blichfeldt, The minimum value of quadratic forms, and the closest packing of spheres,
+Math. Ann. 101 (1929), 605--608.
+
+\bibitem[CS]{CS}
+J.~H. Conway, N.~J.~A. Sloane,
+\emph{Sphere Packings, Lattices and Groups}, 3rd ed., Grundlehren Math. Wiss. 290,
+Springer, 1999.
+
+\bibitem[KL]{KL}
+D.~Kim, S.~H. Lee, Lifting problem for universal quadratic forms over totally real cubic number
+fields, arXiv:2307.07118.
+
+\bibitem[KM]{KM}
+V.~Kala, M.~Melistas, Universal quadratic forms and Dedekind zeta functions, arXiv:2311.12911.
+
+\bibitem[KY1]{KY1}
+V.~Kala, P.~Yatsyna, Lifting problem for universal quadratic forms,
+Adv. Math. 377 (2021), 107497.
+
+\bibitem[KY2]{KY2}
+V.~Kala, P.~Yatsyna, Even better sums of squares over quintic and cyclotomic fields,
+arXiv:2402.03850.
+
+\bibitem[LMFDB]{LMFDB}
+The LMFDB Collaboration, The L-functions and modular forms database, \url{https://www.lmfdb.org}.
+
+\bibitem[Ma]{Ma}
+H.~Maa\ss, \"Uber die Darstellung total positiver Zahlen des K\"orpers $R(\sqrt5)$ als Summe von drei
+Quadraten, Abh. Math. Sem. Univ. Hamburg 14 (1941), 185--191.
+
+\bibitem[Si]{Si}
+C.~L. Siegel, Berechnung von Zetafunktionen an ganzzahligen Stellen,
+Nachr. Akad. Wiss. G\"ottingen Math.-Phys. Kl. II (1969), 87--102.
+
+\end{thebibliography}
+
+\end{document}

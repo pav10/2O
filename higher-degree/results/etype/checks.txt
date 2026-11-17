@@ -1,0 +1,57 @@
+x^3 - 21*x - 28  disc=3969  Cl=[3]  [diff]=[1]  b=[-1/504]
+  C=[0]  LHS=-463/126  RHS=-3.67460317460317460317460317460  |LHS-RHS|=4.78 e-38
+  C=[1]  LHS=-655/126  RHS=-5.19841269841269841269841269841  |LHS-RHS|=9.55 e-38
+  C=[2]  LHS=-289/126  RHS=-2.29365079365079365079365079365  |LHS-RHS|=4.78 e-38
+x^3 - x^2 - 16*x + 8  disc=4312  Cl=[3]  [diff]=[1]  b=[-1/504]
+  C=[0]  LHS=-58/21  RHS=-2.76190476190476190476190476190  |LHS-RHS|=4.48 e-38
+  C=[1]  LHS=-106/21  RHS=-5.04761904761904761904761904762  |LHS-RHS|=5.37 e-38
+  C=[2]  LHS=-25/21  RHS=-1.19047619047619047619047619048  |LHS-RHS|=3.13 e-38
+x^3 - x^2 - 9*x + 8  disc=2597  Cl=[3]  [diff]=[0]  b=[-1/504]
+  C=[0]  LHS=-197/84  RHS=-2.34523809523809523809523809524  |LHS-RHS|=3.58 e-38
+  C=[1]  LHS=-53/84  RHS=-0.630952380952380952380952380952  |LHS-RHS|=2.02 e-38
+  C=[2]  LHS=-65/84  RHS=-0.773809523809523809523809523810  |LHS-RHS|=1.79 e-38
+d=2 r_d=1 signs of (-1)^d b_l(2d): +
+d=3 r_d=1 signs of (-1)^d b_l(2d): +
+d=4 r_d=1 signs of (-1)^d b_l(2d): +
+d=5 r_d=1 signs of (-1)^d b_l(2d): +
+d=6 r_d=2 signs of (-1)^d b_l(2d): ++
+d=7 r_d=1 signs of (-1)^d b_l(2d): +
+d=8 r_d=2 signs of (-1)^d b_l(2d): -+
+d=9 r_d=2 signs of (-1)^d b_l(2d): ++
+d=10 r_d=2 signs of (-1)^d b_l(2d): -+
+d=11 r_d=2 signs of (-1)^d b_l(2d): ++
+d=12 r_d=3 signs of (-1)^d b_l(2d): -++
+d=13 r_d=2 signs of (-1)^d b_l(2d): ++
+d=14 r_d=3 signs of (-1)^d b_l(2d): --+
+d=15 r_d=3 signs of (-1)^d b_l(2d): +++
+d=16 r_d=3 signs of (-1)^d b_l(2d): --+
+d=17 r_d=3 signs of (-1)^d b_l(2d): +++
+d=18 r_d=4 signs of (-1)^d b_l(2d): --++
+d=19 r_d=3 signs of (-1)^d b_l(2d): +++
+d=20 r_d=4 signs of (-1)^d b_l(2d): ---+
+d=21 r_d=4 signs of (-1)^d b_l(2d): ++++
+d=22 r_d=4 signs of (-1)^d b_l(2d): ---+
+d=23 r_d=4 signs of (-1)^d b_l(2d): ++++
+d=24 r_d=5 signs of (-1)^d b_l(2d): ---++
+d=25 r_d=4 signs of (-1)^d b_l(2d): ++++
+d=26 r_d=5 signs of (-1)^d b_l(2d): ----+
+d=27 r_d=5 signs of (-1)^d b_l(2d): +++++
+d=28 r_d=5 signs of (-1)^d b_l(2d): ----+
+d=29 r_d=5 signs of (-1)^d b_l(2d): +++++
+d=30 r_d=6 signs of (-1)^d b_l(2d): ----++
+d=31 r_d=5 signs of (-1)^d b_l(2d): +++++
+d=32 r_d=6 signs of (-1)^d b_l(2d): -----+
+d=33 r_d=6 signs of (-1)^d b_l(2d): ++++++
+d=34 r_d=6 signs of (-1)^d b_l(2d): -----+
+d=35 r_d=6 signs of (-1)^d b_l(2d): ++++++
+d=36 r_d=7 signs of (-1)^d b_l(2d): -----++
+d=37 r_d=6 signs of (-1)^d b_l(2d): ++++++
+d=38 r_d=7 signs of (-1)^d b_l(2d): ------+
+d=39 r_d=7 signs of (-1)^d b_l(2d): +++++++
+d=40 r_d=7 signs of (-1)^d b_l(2d): ------+
+d=41 r_d=7 signs of (-1)^d b_l(2d): +++++++
+d=42 r_d=8 signs of (-1)^d b_l(2d): ------++
+d=43 r_d=7 signs of (-1)^d b_l(2d): +++++++
+8 x^2 - 2 [1/2, x, -2]
+12 x^2 - 3 [1/2, -x, -3]
+13 x^2 - x - 3 [-1/13*x + 7/13, -x + 1, -3]

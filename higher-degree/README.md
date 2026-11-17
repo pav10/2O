@@ -257,3 +257,36 @@ after the integrality refinement.
   more than 2 minutes, while S goes up to 54. About 90% of the leaves fail only the final
   rung test, which cannot be applied higher in the tree. Degree 9 needs a new theoretical
   restriction in Case A.
+
+## Siegel's formula by ideal classes (`notes/etype-zeta.pdf`)
+
+A separate line of attack, following Kala–Yatsyna's E-type argument and Kala–Melistas, that removes
+the **principal codifferent** hypothesis from their discriminant bounds.
+
+* **Class version of Siegel's formula** (Prop. 2.1): one identity per wide ideal class C,
+  Σ_ℓ b_ℓ(2d) Σ_{ν∈T_ℓ} a_C(ν) = (−1)^d |Δ|^{3/2} ζ(2; C⁻¹[𝔇]) / (4π²)^d, where
+  a_C(ν) sums N𝔟 over the divisors 𝔟 of ν𝔇 in C. Checked to 32–38 digits in degrees 3, 4, 6
+  (`src/etype_zeta_checks.gp`, `src/etype_zeta_checks6.gp`).
+* **Condition (1.1):** for ν ∈ T_{m(K)}, the only principal divisor of ν𝔇 is O_K. It follows from a
+  universal ℤ-form when d ≤ 43 ([KY1, Cor. 4.5, Lemma 4.6]); no principality is assumed.
+* **Theorem 1.1:** if m(K) = r_d (automatic for d = 2, 3, 4, 5, 7) and (1.1) holds, then every ideal in
+  the class of 𝔇 has norm ≥ (|Δ|/(A_d c_d))^{1/2}, hence |Δ| ≤ (A_d c_d G_d²)^{d−1}, and R_K is bounded.
+  The key inputs: (1.1) ⟺ #T_{r_d} = |Δ|^{3/2} ζ(2;[𝔇]) / A_d; #T_ℓ ≪ |Δ|^{1/2} (Poisson summation
+  over the trace-zero codifferent, whose dual is the variance lattice); a shortest trace-zero ξ ∈ O^∨
+  gives ξ𝔇 ∈ [𝔇] of norm ≪ |Δ|^{(d−2)/(2d−2)}.
+* **Corollary 1.2:** bounds 13 (d = 2) and 3621 (d = 3); exact certificates for all other fields give
+  an independent proof that Q(√5) and Q(ζ₇)⁺ are the only quadratic/cubic fields with a universal ℤ-form
+  (`results/etype/cert_cubic_disc_le_3621.txt`). Bounds for d ≥ 4 are huge (`results/etype/constants.txt`).
+* **Census** (`src/etype_census.sh`): among the LMFDB lists, (1.1) holds only for discriminants 49,
+  725, 1125, 14641; it fails for all 9,859 cubic and 19 quartic fields with non-principal different.
+* **What remains for d ≥ 6 with m(K) < r_d** (§7): the sums over T_ℓ, m(K) < ℓ ≤ r_d, i.e. the
+  shells of t_δ ⊗ Q above the minimum. This, not the codifferent, is the obstacle (also in the
+  principal case).
+
+| file | contents |
+|---|---|
+| `src/etype_zeta.gp` | library: Siegel coefficients, T_ℓ, partial ζ(2;C), formula (2.1), condition (1.1), certificates, constants |
+| `src/etype_zeta_checks.gp`, `src/etype_zeta_checks6.gp` | checks of (2.1), sign table of b_ℓ(2d), d = 2 certificates |
+| `src/etype_estimates.gp`, `src/etype_constants.gp` | Lemmas 4.1–4.3 on sample fields; Table 1 for all d ≤ 43 |
+| `src/etype_census.gp`, `src/etype_census.sh` | census drivers (field lists from `pav10/variance/data/fields`) |
+| `results/etype/` | outputs of all of the above |
